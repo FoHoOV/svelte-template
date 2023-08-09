@@ -1,2 +1,7 @@
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation</p>
+<article class="prose lg:prose-xl">
+	<h1>A simple todo app created with svelte!</h1>
+	<p>
+		For years I've been creating web apps using vanilla js/css but what the fuck I was doing with my
+		life?
+	</p>
+</article>
