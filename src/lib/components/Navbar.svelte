@@ -1,8 +1,14 @@
 <script lang="ts">
 	import Fa from 'svelte-fa/src/fa.svelte';
-	import { faBarsStaggered } from '@fortawesome/free-solid-svg-icons';
+	import { faBarsStaggered, faMoon, faSun } from '@fortawesome/free-solid-svg-icons';
+	import { themeChange } from 'theme-change';
+	import { onMount } from 'svelte';
 	export let appName: string;
 	export let href: string;
+
+	onMount(() => {
+		themeChange(false);
+	});
 </script>
 
 <div class="navbar shadow-2xl bg-base-100">
@@ -29,6 +35,18 @@
 		</ul>
 	</div>
 	<div class="navbar-end">
+		<label class="swap swap-rotate">
+			<!-- this hidden checkbox controls the state -->
+			<input type="checkbox" />
+
+			<span class="swap-on" data-key="selected-theme" data-toggle-theme="dark">
+				<Fa icon={faSun} class="fill-current w-10 h-5" />
+			</span>
+
+			<span class="swap-off fill-current" data-key="selected-theme" data-toggle-theme="light">
+				<Fa icon={faMoon} class="fill-current w-10 h-5" />
+			</span>
+		</label>
 		<ul class="menu px-1">
 			<slot name="end" />
 		</ul>
