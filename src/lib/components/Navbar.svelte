@@ -8,10 +8,16 @@
 <div class="navbar bg-base-100">
 	<div class="navbar-start">
 		<div class="dropdown">
-			<span class="btn btn-ghost lg:hidden">
+			<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+			<!-- svelte-ignore a11y-label-has-associated-control -->
+			<label tabindex="0" class="btn btn-ghost lg:hidden">
 				<Fa icon={faBarsStaggered} />
-			</span>
-			<ul class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+			</label>
+			<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
+			<ul
+				tabindex="0"
+				class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
+			>
 				<slot name="center" />
 			</ul>
 		</div>
@@ -23,9 +29,8 @@
 		</ul>
 	</div>
 	<div class="navbar-end">
-        <ul class="menu px-1">
-            <slot name="end" />
-        </ul>
-
+		<ul class="menu px-1">
+			<slot name="end" />
+		</ul>
 	</div>
 </div>

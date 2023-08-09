@@ -5,12 +5,12 @@
 </script>
 
 <Navbar appName="Todos" href="/">
-	<div slot="center">
-		<NavbarItem href="users/todos" name="list" />
-	</div>
-	<div slot="end">
+	<svelte:fragment slot="center">
+		<NavbarItem href="/users/todos" name="list" />
+	</svelte:fragment>
+	<svelte:fragment slot="end">
 		<NavbarItem href="/users/login" name="login" />
-	</div>
+	</svelte:fragment>
 </Navbar>
 
 <div class="mx-auto px-6">
