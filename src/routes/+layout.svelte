@@ -13,6 +13,6 @@
 	</svelte:fragment>
 </Navbar>
 
-<div class="mx-auto px-6">
+<div class="mx-auto px-6 pt-6">
 	<slot />
 </div>
