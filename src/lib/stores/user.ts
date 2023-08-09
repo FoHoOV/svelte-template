@@ -5,17 +5,17 @@ export type User = {
 	username: string;
 };
 
-const user = writable<User>({ isLoggedIn: false, username: '' });
+const { set: _set, subscribe } = writable<User>({ isLoggedIn: false, username: '' });
 
 const login = (username: string) => {
-	user.set({
+	_set({
 		isLoggedIn: true,
 		username: username
 	});
 };
 
 const signOut = () => {
-	user.set({ isLoggedIn: false, username: '' });
+	_set({ isLoggedIn: false, username: '' });
 };
 
-export default { login, signOut };
+export default { login, signOut, subscribe };
