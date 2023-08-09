@@ -3,4 +3,4 @@
 	export let href: string;
 </script>
 
-<li><a {href}>{name}</a></li>
+<li><a class="btn btn-ghost normal-case text-xl" {href}>{name}</a></li>

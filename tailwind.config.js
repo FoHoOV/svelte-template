@@ -1,5 +1,4 @@
 import daisyui from 'daisyui';
-import { themes } from 'daisyui/src/colors/themes';
 import typography from '@tailwindcss/typography';
 
 /** @type {import('tailwindcss').Config} */
@@ -8,7 +7,6 @@ export default {
 	daisyui: {
 		themes: {
 			dark: {
-				...themes['[data-theme=dark]'],
 				primary: '#641ae6',
 				secondary: '#d926a9',
 				accent: '#1fb2a6',
@@ -20,7 +18,6 @@ export default {
 				error: '#f87272'
 			},
 			light: {
-				...themes['[data-theme=light]'],
 				primary: '#f4f11a',
 				secondary: '#6502dd',
 				accent: '#c62b30',

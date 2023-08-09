@@ -1,11 +1,20 @@
 <script lang="ts">
 	import Fa from 'svelte-fa/src/fa.svelte';
+	import { faBarsStaggered } from '@fortawesome/free-solid-svg-icons';
 	export let appName: string;
 	export let href: string;
 </script>
 
 <div class="navbar bg-base-100">
 	<div class="navbar-start">
+		<div class="dropdown">
+			<span class="btn btn-ghost lg:hidden">
+				<Fa icon={faBarsStaggered} />
+			</span>
+			<ul class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+				<slot name="center" />
+			</ul>
+		</div>
 		<a class="btn btn-ghost normal-case text-xl" {href}>{appName}</a>
 	</div>
 	<div class="navbar-center hidden lg:flex">
@@ -14,6 +23,9 @@
 		</ul>
 	</div>
 	<div class="navbar-end">
-		<slot name="end" />
+        <ul class="menu px-1">
+            <slot name="end" />
+        </ul>
+
 	</div>
 </div>

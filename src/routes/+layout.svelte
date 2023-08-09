@@ -5,11 +5,14 @@
 </script>
 
 <Navbar appName="Todos" href="/">
-	<slot name="center">
+	<div slot="center">
 		<NavbarItem href="users/todos" name="list" />
-	</slot>
-	<slot name="end">
+	</div>
+	<div slot="end">
 		<NavbarItem href="/users/login" name="login" />
-	</slot>
+	</div>
 </Navbar>
-<slot />
+
+<div class="mx-auto px-6">
+	<slot />
+</div>
