@@ -32,7 +32,7 @@
 	use:form
 	class="flex items-start justify-center card bg-neutral w-full flex-row"
 >
-	<div class="card-body items-center text-center md:w-1/2">
+	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
 		<FormInput name="title" className="w-full" hideLabel={true} errors={$errors.title} />
 		<FormInput name="description" className="w-full" hideLabel={true} errors={$errors.description} />
 		<div class="card-actions justify-end w-full">

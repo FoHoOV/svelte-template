@@ -13,6 +13,7 @@ const removeTodo = (todo: Todo) => {
 	_update((value) => {
 		return value.filter((value) => value.id !== todo.id);
 	});
+	
 };
 
 const clearTodos = () => {
