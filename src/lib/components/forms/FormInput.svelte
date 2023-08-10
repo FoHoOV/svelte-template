@@ -7,7 +7,7 @@
 	export let hideLabel: boolean = false;
 </script>
 
-<div class="flex flex-col md:flex-row {className}">
+<div class="flex flex-col {className}">
 	<label class="label" class:hidden={hideLabel} for={name}>
 		<span class="label-text">{name}</span>
 	</label>
@@ -16,7 +16,7 @@
 		id={name}
 		{name}
 		placeholder={name}
-		class="input input-bordered w-full max-w-xs"
+		class="input input-bordered w-full"
 	/>
 	<FormError error={errors?.at(0)} className="mt-2" />
 </div>
