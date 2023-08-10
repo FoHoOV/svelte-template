@@ -2,7 +2,9 @@
 // for information about these interfaces
 declare global {
 	namespace App {
-		// interface Error {}
+		interface Error {
+			data?: Record<string, any>;
+		}
 		// interface Locals {}
 		// interface PageData {}
 		// interface Platform {}

@@ -7,8 +7,11 @@ export const load = (async () => {
 
 export const actions = {
 	default: async ({ cookies, request }) => {
+		const formData = await request.formData();
+
 		throw error(403, {
-			message: {
+			message: 'form validations failed',
+			data: {
 				description: 'required'
 			}
 		});

@@ -3,7 +3,7 @@
 	import FormInput from '$lib/components/forms/FormInput.svelte';
 	import { validator } from '@felte/validator-zod';
 	import type { z } from 'zod';
-	import { createForm,  FelteSubmitError } from 'felte';
+	import { createForm, FelteSubmitError } from 'felte';
 	import { schema } from './validator';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import TodoList from '$lib/components/todo/TodoList.svelte';
@@ -15,8 +15,9 @@
 				return;
 			}
 			const json = await error.response.json();
+			const serverError: App.Error = json.error;
 			return {
-				description: json.error.message.description
+				description: serverError.data?.description
 			};
 		},
 		onSuccess: () => {
