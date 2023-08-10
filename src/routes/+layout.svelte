@@ -13,7 +13,7 @@
 		<NavbarItem href="/user/todos" name="list" />
 	</svelte:fragment>
 	<svelte:fragment slot="end">
-		{#if data.user.isLoggedIn || $user.isLoggedIn}
+		{#if data.user.isLoggedIn && $user.isLoggedIn}
 			<NavbarItem href="/user/logout" name="logout" />
 		{:else}
 			<NavbarItem href="/user/login" name="login" />
