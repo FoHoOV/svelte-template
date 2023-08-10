@@ -4,7 +4,7 @@
 	export let className: string = '';
 </script>
 
-<button class="btn {className}" disabled={loading}>
+<button on:click class="btn disabled:cursor-not-allowed {className}" disabled={loading}>
 	{#if loading}
 		<span class="loading loading-dots loading-sm" />
 	{:else}

@@ -1,12 +1,14 @@
 <script lang="ts">
 	import FormError from './FormError.svelte';
 
+	export let className: string = '';
 	export let name: string;
 	export let errors: string[] | null;
+	export let hideLabel: boolean = false;
 </script>
 
-<div class="flex flex-col md:flex-row">
-	<label class="label" for={name}>
+<div class="flex flex-col md:flex-row {className}">
+	<label class="label" class:hidden={hideLabel} for={name}>
 		<span class="label-text">{name}</span>
 	</label>
 	<input
