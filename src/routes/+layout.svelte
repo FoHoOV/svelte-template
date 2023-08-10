@@ -4,6 +4,7 @@
 	import NavbarItem from '$lib/components/navbar/NavbarItem.svelte';
 	import user from '$lib/stores/user';
 	import type { LayoutData } from './$types';
+	import { navigating } from '$app/stores';
 
 	export let data: LayoutData;
 </script>
@@ -21,5 +22,11 @@
 	</svelte:fragment>
 </Navbar>
 <div class="mx-auto px-6 pt-6">
-	<slot />
+	{#if $navigating}
+		<span
+			class="absolute top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 loading loading-ball loading-lg"
+		/>
+	{:else}
+		<slot />
+	{/if}
 </div>
