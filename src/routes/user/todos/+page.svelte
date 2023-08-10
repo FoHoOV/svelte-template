@@ -16,9 +16,7 @@
 			}
 			const json = await error.response.json();
 			const serverError: App.Error = json.error;
-			return {
-				description: serverError.data?.description
-			};
+			return serverError.data
 		},
 		onSuccess: () => {
 			todos.addTodo({
