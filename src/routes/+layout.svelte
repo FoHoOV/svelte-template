@@ -8,9 +8,9 @@
 	export let data: LayoutData;
 </script>
 
-<Navbar appName="Todos" href="/">
+<Navbar appName="Todos" href="/user/todos">
 	<svelte:fragment slot="center">
-		<NavbarItem href="/user/todos" name="list" />
+		<NavbarItem href="/" name="home" />
 	</svelte:fragment>
 	<svelte:fragment slot="end">
 		{#if data.user.isLoggedIn && $user.isLoggedIn}
