@@ -1,9 +1,5 @@
 import { writable } from 'svelte/store';
-
-export type User = {
-	isLoggedIn: boolean;
-	username: string;
-};
+import type { User } from '$lib/types/user/user';
 
 const { set: _set, subscribe } = writable<User>({ isLoggedIn: false, username: '' });
 
@@ -14,8 +10,8 @@ const login = (username: string) => {
 	});
 };
 
-const signOut = () => {
+const logout = () => {
 	_set({ isLoggedIn: false, username: '' });
 };
 
-export default { login, signOut, subscribe };
+export default { login, logout, subscribe };

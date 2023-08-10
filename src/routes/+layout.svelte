@@ -10,13 +10,13 @@
 
 <Navbar appName="Todos" href="/">
 	<svelte:fragment slot="center">
-		<NavbarItem href="/users/todos" name="list" />
+		<NavbarItem href="/user/todos" name="list" />
 	</svelte:fragment>
 	<svelte:fragment slot="end">
 		{#if data.user.isLoggedIn || $user.isLoggedIn}
-			<NavbarItem href="/users/logout" name="logout" />
+			<NavbarItem href="/user/logout" name="logout" />
 		{:else}
-			<NavbarItem href="/users/login" name="login" />
+			<NavbarItem href="/user/login" name="login" />
 		{/if}
 	</svelte:fragment>
 </Navbar>

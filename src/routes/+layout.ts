@@ -5,7 +5,7 @@ export const load = (async ({ data }) => {
 	if (data.user.isLoggedIn && data.user.username) {
 		user.login(data.user.username);
 	} else {
-		user.signOut();
+		user.logout();
 	}
-	return {...data};
+	return { ...data };
 }) satisfies LayoutLoad;
