@@ -7,8 +7,9 @@
 	import FormInput from '$lib/components/forms/FormInput.svelte';
 	import user from '$lib/stores/user';
 	import { goto } from '$app/navigation';
+	import LoadingButton from '../../../lib/components/buttons/LoadingButton.svelte';
 
-	const { form, errors, data } = createForm<z.infer<typeof schema>>({
+	const { form, errors, data, isSubmitting } = createForm<z.infer<typeof schema>>({
 		extend: validator({ schema }),
 		onSuccess: () => {
 			user.login($data.username);
@@ -21,5 +22,5 @@
 	<div class="form-control w-full max-w-xs">
 		<FormInput name="username" errors={$errors.username} />
 	</div>
-	<button class="btn btn-primary mt-4" type="submit">Login</button>
+	<LoadingButton className="btn-primary mt-4" text="login" loading={$isSubmitting} />
 </form>
