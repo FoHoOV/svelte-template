@@ -28,7 +28,9 @@
 					<h1>
 						{todo.title}
 					</h1>
-					<Fa icon={faTrashCan} />
+					<button on:click={() => todos.removeTodo(todo)}>
+						<Fa icon={faTrashCan} class="text-red-400" />
+					</button>
 				</div>
 				<p>{todo.description}</p>
 			</div>
