@@ -2,12 +2,15 @@
 	import user from '$lib/stores/user';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-
-	if (!$user.isLoggedIn && $page.route.id !== '/user/login') {
-		goto('/user/login');
+	import type { LayoutRouteId } from '../$types';
+	
+	const notLoggedInRoutes: LayoutRouteId[] = ['/user/login', '/user/signup'];
+	
+	const isCurrentRouteProtected=()=>{
+		return !notLoggedInRoutes.includes(<any>$page.route.id ?? "");
 	}
 
-	$: if (!$user.isLoggedIn && $page.route.id !== '/user/login') {
+	$: if (!$user.isLoggedIn && isCurrentRouteProtected()) {
 		goto('/user/login');
 	}
 </script>

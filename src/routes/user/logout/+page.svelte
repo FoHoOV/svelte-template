@@ -25,6 +25,7 @@
 			className="btn-warning mt-2"
 			text="Yes, I'm a piece of shit"
 			loading={$isSubmitting}
+			type="submit"
 		/>
 		<FormError {error} />
 	</div>

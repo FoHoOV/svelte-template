@@ -50,7 +50,7 @@
 			errors={$errors.description}
 		/>
 		<div class="card-actions justify-end w-full">
-			<LoadingButton text="add" className="flex-auto" loading={$isSubmitting} />
+			<LoadingButton text="add" className="flex-auto" loading={$isSubmitting} type="submit"/>
 			<LoadingButton text="reset" className="btn-warning" on:click={handleReset} />
 		</div>
 	</div>
