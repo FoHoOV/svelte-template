@@ -9,17 +9,31 @@ export const load = (async () => {
 export const actions = {
 	default: async ({ cookies, request }) => {
 		const formData = await request.formData();
-		const user = schema.safeParse({
-			username: formData.get('username')
-		});
+		const validationsResult = schema.safeParse(Object.fromEntries(formData.entries()));
 
-		if (!user.success) {
+		if (!validationsResult.success) {
+			console.log(validationsResult.error.flatten().fieldErrors);
+			throw error(403, {
+				message: 'form validations failed',
+				data: validationsResult.error.flatten().fieldErrors
+			});
+		}
+		const res = await fetch(`${import.meta.env.VITE_API_URL}/user/authenticate`, {
+			method: 'post',
+			body: JSON.stringify(validationsResult.data),
+			headers: {
+				'Content-Type': 'application/json'
+			}
+		});
+		const json = await res.json();
+		if (!res.ok) {
 			throw error(404, {
-				message: user.error.message
+				message: 'Some errors has occurred',
+				data: json.detail
 			});
 		}
 
-		cookies.set('username', user.data.username);
+		cookies.set('username', validationsResult.data.username);
 		return {
 			success: true
 		};
