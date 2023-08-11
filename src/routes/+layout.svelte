@@ -5,8 +5,11 @@
 	import user from '$lib/stores/user';
 	import type { LayoutData } from './$types';
 	import { navigating } from '$app/stores';
+	import { OpenAPI } from '$lib/client';
 
 	export let data: LayoutData;
+
+	OpenAPI.TOKEN = $user.accessToken;
 </script>
 
 <Navbar appName="Todos" href="/user/todos">
@@ -14,7 +17,7 @@
 		<NavbarItem href="/" name="home" />
 	</svelte:fragment>
 	<svelte:fragment slot="end">
-		{#if data.user.isLoggedIn && $user.isLoggedIn}
+		{#if $user.accessToken}
 			<NavbarItem href="/user/logout" name="logout" />
 		{:else}
 			<NavbarItem href="/user/login" name="login" />

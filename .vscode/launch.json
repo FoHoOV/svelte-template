@@ -11,6 +11,12 @@
             "type": "node-terminal"
         },
         {
+            "command": "npm run open-api:generate",
+            "name": "npm:open-api:generate",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
             "type": "chrome",
             "request": "launch",
             "name": "chrome:dev",

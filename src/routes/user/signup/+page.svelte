@@ -3,7 +3,8 @@
 		createForm,
 		FelteSubmitError,
 		type FelteErrorEvent,
-		type FelteSuccessEvent
+		type FelteSuccessEvent,
+		type FelteSuccessDetail
 	} from 'felte';
 	import type { PageData } from './$types';
 	import { schema } from './validator';
@@ -14,11 +15,11 @@
 	import { goto } from '$app/navigation';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import FormError from '$lib/components/forms/FormError.svelte';
+	import type { Token } from '$lib/client';
 
 	const { form, errors, data, isSubmitting } = createForm<z.infer<typeof schema>>({
 		extend: validator({ schema }),
-		onSuccess: () => {
-			user.login($data.username);
+		onSuccess: (response) => {
 			goto('/user/login');
 		},
 		onError: async (error) => {

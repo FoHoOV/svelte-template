@@ -1,4 +1,4 @@
 export type User = {
-	isLoggedIn: boolean;
+	accessToken: string;
 	username: string;
 };

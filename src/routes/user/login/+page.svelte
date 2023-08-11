@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { createForm, FelteSubmitError, type FelteErrorEvent, type FelteSuccessEvent } from 'felte';
+	import { createForm, FelteSubmitError } from 'felte';
 	import type { PageData } from './$types';
 	import { schema } from './validator';
 	import { validator } from '@felte/validator-zod';
@@ -8,11 +8,16 @@
 	import user from '$lib/stores/user';
 	import { goto } from '$app/navigation';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
+	import { UserService, type Token, OAuthService } from '$lib/client';
 
-	const { form, errors, data, isSubmitting } = createForm<z.infer<typeof schema>>({
+	const { form, errors, isSubmitting } = createForm<z.infer<typeof schema>>({
 		extend: validator({ schema }),
-		onSuccess: () => {
-			user.login($data.username);
+		onSubmit: async (values) => {
+			return await OAuthService.loginForAccessTokenOauthTokenPost(values);
+		},
+		onSuccess: async (response) => {
+			const token = <Token>response;
+			user.login(token.access_token);
 			goto('/user/todos');
 		},
 		onError: async (error) => {

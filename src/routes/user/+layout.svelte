@@ -10,7 +10,7 @@
 		return !notLoggedInRoutes.includes(<any>$page.route.id ?? "");
 	}
 
-	$: if (!$user.isLoggedIn && isCurrentRouteProtected()) {
+	$: if (!$user.accessToken && isCurrentRouteProtected()) {
 		goto('/user/login');
 	}
 </script>
