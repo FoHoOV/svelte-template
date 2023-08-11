@@ -1,18 +1,19 @@
 import { writable } from 'svelte/store';
-import type { User } from '$lib/types/user/user';
-import user from '$lib/stores/user';
+import type { Token } from '$lib/client/models/Token';
 
-const { set: _set, subscribe } = writable<User>({ accessToken: '', username: '' });
+export type UserWithAccessToken = ({username :string} & Token) | null; 
 
-const login = (accessToken: string) => {
+const { set: _set, subscribe } = writable<UserWithAccessToken>(null);
+0
+const login = (token: Token, username: string) => {
 	_set({
-		accessToken: accessToken,
-		username: accessToken
+		...token,
+		username: username,
 	});
 };
 
 const logout = () => {
-	_set({ accessToken: '', username: '' });
+	_set(null);
 };
 
 

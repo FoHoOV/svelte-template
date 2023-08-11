@@ -1,11 +1,11 @@
 import { writable } from 'svelte/store';
-import type { Todo } from '$lib/types/user';
+import type { Todo } from '$lib/client/models/Todo';
 
 const { set: _set, subscribe, update: _update } = writable<Todo[]>([]);
 
-const addTodo = (todo: Omit<Todo, 'id' | 'isDone'>): void => {
+const addTodo = (todo: Todo): void => {
 	_update((value) => {
-		return [...value, { ...todo, isDone: false, id: crypto.randomUUID() }];
+		return [...value, todo];
 	});
 };
 

@@ -3,13 +3,10 @@
 	import Navbar from '$lib/components/navbar/Navbar.svelte';
 	import NavbarItem from '$lib/components/navbar/NavbarItem.svelte';
 	import user from '$lib/stores/user';
-	import type { LayoutData } from './$types';
 	import { navigating } from '$app/stores';
 	import { OpenAPI } from '$lib/client';
 
-	export let data: LayoutData;
-
-	$: OpenAPI.TOKEN = $user.accessToken;
+	$: OpenAPI.TOKEN = $user?.access_token;
 </script>
 
 <Navbar appName="Todos" href="/user/todos">
@@ -17,7 +14,7 @@
 		<NavbarItem href="/" name="home" />
 	</svelte:fragment>
 	<svelte:fragment slot="end">
-		{#if $user.accessToken}
+		{#if $user?.access_token}
 			<NavbarItem href="/user/logout" name="logout" />
 		{:else}
 			<NavbarItem href="/user/login" name="login" />

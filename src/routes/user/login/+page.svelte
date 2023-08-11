@@ -8,25 +8,24 @@
 	import user from '$lib/stores/user';
 	import { goto } from '$app/navigation';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
-	import { UserService, type Token, OAuthService } from '$lib/client';
+	import { type Token, OAuthService, ApiError } from '$lib/client';
+	import FormError from '../../../lib/components/forms/FormError.svelte';
 
-	const { form, errors, isSubmitting } = createForm<z.infer<typeof schema>>({
+	let apiErrorTitle: string | null = null;
+
+	const { form, data, errors, isSubmitting } = createForm<z.infer<typeof schema>>({
 		extend: validator({ schema }),
 		onSubmit: async (values) => {
-			return await OAuthService.loginForAccessTokenOauthTokenPost(values);
+			return await OAuthService.loginForAccessToken(values);
 		},
-		onSuccess: async (response) => {
+		onSuccess: (response) => {
 			const token = <Token>response;
-			user.login(token.access_token);
+			user.login(token, $data.username); // TODO: set the cookie or in local storage? but how do we access that in server side if its in local storage
 			goto('/user/todos');
 		},
-		onError: async (error) => {
-			if (!(error instanceof FelteSubmitError)) {
-				return;
-			}
-			const json = await error.response.json();
-			const serverError: App.Error = json.error;
-			return serverError.data;
+		onError: (error) => {
+			const apiError = <ApiError>error;
+			apiErrorTitle = apiError.body?.detail;
 		}
 	});
 </script>
@@ -37,17 +36,18 @@
 	class="flex items-start justify-center card bg-neutral w-full flex-row"
 >
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
+		<FormError error={apiErrorTitle}></FormError>
 		<FormInput name="username" className="w-full" errors={$errors.username} />
 		<FormInput name="password" className="w-full" type="password" errors={$errors.password} />
 		<div class="card-actions justify-start w-full">
 			<LoadingButton
-				className="btn-primary mt-4"
+				className="btn-primary mt-4 flex-grow"
 				text="login"
 				loading={$isSubmitting}
 				type="submit"
 			/>
 			<LoadingButton
-				className="btn-primary mt-4"
+				className="btn-primary mt-4 flex-grow"
 				text="signup"
 				loading={$isSubmitting}
 				on:click={() => goto('/user/signup')}

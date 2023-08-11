@@ -2,7 +2,7 @@
 	import user from '$lib/stores/user';
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import type { LayoutRouteId } from '../$types';
+	import type { LayoutRouteId } from './$types';
 	import { browser } from '$app/environment';
 
 	const notLoggedInRoutes: LayoutRouteId[] = ['/user/login', '/user/signup'];
@@ -11,7 +11,7 @@
 		return !notLoggedInRoutes.includes(<any>$page.route.id ?? '');
 	};
 
-	$: if (!$user.accessToken && isCurrentRouteProtected()) {
+	$: if (browser && !$user?.access_token && isCurrentRouteProtected()) {
 		goto('/user/login');
 	}
 </script>

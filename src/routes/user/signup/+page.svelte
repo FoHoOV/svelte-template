@@ -1,10 +1,6 @@
 <script lang="ts">
 	import {
 		createForm,
-		FelteSubmitError,
-		type FelteErrorEvent,
-		type FelteSuccessEvent,
-		type FelteSuccessDetail
 	} from 'felte';
 	import type { PageData } from './$types';
 	import { schema } from './validator';
@@ -15,24 +11,21 @@
 	import { goto } from '$app/navigation';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import FormError from '$lib/components/forms/FormError.svelte';
-	import type { Token } from '$lib/client';
+	import { UserService, type ApiError, type Token } from '$lib/client';
+
+	let apiErrorTitle: null | string = '';
 
 	const { form, errors, data, isSubmitting } = createForm<z.infer<typeof schema>>({
 		extend: validator({ schema }),
-		onSubmit: () => {
-			return {};
+		onSubmit: async (values) => {
+			return await UserService.signup(values);
 		},
 		onSuccess: (response) => {
-			user.logout();
 			goto('/user/login');
 		},
 		onError: async (error) => {
-			if (!(error instanceof FelteSubmitError)) {
-				return;
-			}
-			const json = await error.response.json();
-			const serverError: App.Error = json.error;
-			return serverError.data;
+			const apiError = <ApiError>error;
+			apiErrorTitle = apiError.body.detail?.username || apiError.body.detail;
 		}
 	});
 </script>
@@ -43,6 +36,7 @@
 	class="flex items-start justify-center card bg-neutral w-full flex-row"
 >
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
+		<FormError error={apiErrorTitle} />
 		<FormInput name="username" className="w-full" errors={$errors.username} />
 		<FormInput name="password" className="w-full" type="password" errors={$errors.password} />
 		<div class="card-actions justify-start w-full">

@@ -2,18 +2,29 @@
 	import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
 	import Fa from 'svelte-fa/src/fa.svelte';
 	import todos from '$lib/stores/todos';
-	import type { Todo } from '$lib/types/user';
+	import type { Todo } from '$lib/client/models/Todo';
+	import { ApiError, TodoService } from '$lib/client';
+	import FormError from '$lib/components/forms/FormError.svelte';
 
 	export let todo: Todo;
 	let isBeingDeleted: boolean = false;
-
-	function handleRemove() {
+	let apiErrorTitle: string | null;
+	async function handleRemove() {
 		isBeingDeleted = true;
-		todos.removeTodo(todo);
+		try {
+			await TodoService.makeCompleted(todo);
+			todos.removeTodo(todo);
+			isBeingDeleted = false;
+		} catch (e) {
+			const apiError = <ApiError>e;
+			apiErrorTitle = apiError.message;
+			isBeingDeleted = false;
+		}
 	}
 </script>
 
 <div class="card-body">
+	<FormError error={apiErrorTitle} />
 	{#if isBeingDeleted}
 		<div
 			class="absolute flex align-center justify-center top-0.5 left-0.5 w-full h-full z-10 bg-base-300 rounded-lg"

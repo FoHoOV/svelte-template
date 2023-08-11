@@ -3,32 +3,33 @@
 	import FormInput from '$lib/components/forms/FormInput.svelte';
 	import { validator } from '@felte/validator-zod';
 	import type { z } from 'zod';
-	import { createForm, FelteSubmitError } from 'felte';
+	import { createForm } from 'felte';
 	import { schema } from './validator';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import TodoList from '$lib/components/todo/TodoList.svelte';
-	import { TodoService, type Todo } from '$lib/client';
+	import { TodoService, type Todo, ApiError } from '$lib/client';
 	import { onMount } from 'svelte';
 	import user from '$lib/stores/user';
 
 	onMount(async () => {
 		console.log('called');
-		console.log($user.accessToken);
-		console.log(await TodoService.getForUserTodoListGet());
-		todos.setTodos(await TodoService.getForUserTodoListGet());
+		console.log($user?.access_token);
+		console.log(await TodoService.getForUser());
+		todos.setTodos(await TodoService.getForUser());
 	});
 
 	const { form, errors, isSubmitting, reset } = createForm<z.infer<typeof schema>>({
 		extend: validator({ schema }),
 		onSubmit: async (values) => {
-			return await TodoService.createForUserTodoCreatePost(values);
+			return await TodoService.createForUser({...values, is_done: false});
 		},
 		onSuccess: (response) => {
 			const todoItem = <Todo>response;
-			todos.addTodo({
-				title: todoItem.title,
-				description: todoItem.description
-			});
+			todos.addTodo(todoItem);
+		},
+		onError: async (error) => {
+			const apiError = <ApiError>error;
+			console.log(error); // TODO
 		}
 	});
 

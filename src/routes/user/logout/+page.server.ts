@@ -7,8 +7,7 @@ export const load = (async () => {
 
 export const actions = {
 	default: async ({ cookies }) => {
-		cookies.set('username', '');
+		cookies.set('accessToken', '');
         console.log("logged out")
-		return { success: true };
 	}
 } satisfies Actions;
