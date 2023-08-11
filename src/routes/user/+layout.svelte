@@ -3,12 +3,13 @@
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
 	import type { LayoutRouteId } from '../$types';
-	
+	import { browser } from '$app/environment';
+
 	const notLoggedInRoutes: LayoutRouteId[] = ['/user/login', '/user/signup'];
-	
-	const isCurrentRouteProtected=()=>{
-		return !notLoggedInRoutes.includes(<any>$page.route.id ?? "");
-	}
+
+	const isCurrentRouteProtected = () => {
+		return !notLoggedInRoutes.includes(<any>$page.route.id ?? '');
+	};
 
 	$: if (!$user.accessToken && isCurrentRouteProtected()) {
 		goto('/user/login');

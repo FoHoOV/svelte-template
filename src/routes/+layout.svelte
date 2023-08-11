@@ -9,7 +9,7 @@
 
 	export let data: LayoutData;
 
-	OpenAPI.TOKEN = $user.accessToken;
+	$: OpenAPI.TOKEN = $user.accessToken;
 </script>
 
 <Navbar appName="Todos" href="/user/todos">

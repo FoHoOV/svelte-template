@@ -13,11 +13,14 @@ const removeTodo = (todo: Todo) => {
 	_update((value) => {
 		return value.filter((value) => value.id !== todo.id);
 	});
-	
+};
+
+const setTodos = (todos: Todo[]) => {
+	_set(todos);
 };
 
 const clearTodos = () => {
 	_set([]);
 };
 
-export default { addTodo, removeTodo, clearTodos, subscribe };
+export default { addTodo, setTodos, removeTodo, clearTodos, subscribe };

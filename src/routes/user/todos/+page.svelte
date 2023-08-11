@@ -7,21 +7,27 @@
 	import { schema } from './validator';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import TodoList from '$lib/components/todo/TodoList.svelte';
+	import { TodoService, type Todo } from '$lib/client';
+	import { onMount } from 'svelte';
+	import user from '$lib/stores/user';
 
-	const { form, errors, data, isSubmitting, reset } = createForm<z.infer<typeof schema>>({
+	onMount(async () => {
+		console.log('called');
+		console.log($user.accessToken);
+		console.log(await TodoService.getForUserTodoListGet());
+		todos.setTodos(await TodoService.getForUserTodoListGet());
+	});
+
+	const { form, errors, isSubmitting, reset } = createForm<z.infer<typeof schema>>({
 		extend: validator({ schema }),
-		onError: async (error) => {
-			if (!(error instanceof FelteSubmitError)) {
-				return;
-			}
-			const json = await error.response.json();
-			const serverError: App.Error = json.error;
-			return serverError.data
+		onSubmit: async (values) => {
+			return await TodoService.createForUserTodoCreatePost(values);
 		},
-		onSuccess: () => {
+		onSuccess: (response) => {
+			const todoItem = <Todo>response;
 			todos.addTodo({
-				title: $data.title,
-				description: $data.description
+				title: todoItem.title,
+				description: todoItem.description
 			});
 		}
 	});
@@ -50,7 +56,7 @@
 			errors={$errors.description}
 		/>
 		<div class="card-actions justify-end w-full">
-			<LoadingButton text="add" className="flex-auto" loading={$isSubmitting} type="submit"/>
+			<LoadingButton text="add" className="flex-auto" loading={$isSubmitting} type="submit" />
 			<LoadingButton text="reset" className="btn-warning" on:click={handleReset} />
 		</div>
 	</div>

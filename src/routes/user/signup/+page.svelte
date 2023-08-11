@@ -19,7 +19,11 @@
 
 	const { form, errors, data, isSubmitting } = createForm<z.infer<typeof schema>>({
 		extend: validator({ schema }),
+		onSubmit: () => {
+			return {};
+		},
 		onSuccess: (response) => {
+			user.logout();
 			goto('/user/login');
 		},
 		onError: async (error) => {
