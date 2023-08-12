@@ -10,6 +10,8 @@
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import { type Token, OAuthService, ApiError } from '$lib/client';
 	import FormError from '$lib/components/forms/FormError.svelte';
+	import Cookies from 'js-cookie';
+	import KEYS from '$lib/constants/cookie';
 
 	let apiErrorTitle: string | null = null;
 
@@ -22,6 +24,8 @@
 			const token = <Token>response;
 			user.login(token, $data.username); 
 			goto('/user/todos');
+			Cookies.set(KEYS.IS_LOGGED_IN, "true", {sameSite: "Strict"});
+			console.log(Cookies.get("is-logged-in"));
 		},
 		onError: (error) => {
 			const apiError = <ApiError>error;

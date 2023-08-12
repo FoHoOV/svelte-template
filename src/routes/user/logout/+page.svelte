@@ -1,15 +1,16 @@
 <script lang="ts">
-	import { createForm } from 'felte';
-	import FormError from '$lib/components/forms/FormError.svelte';
 	import { goto } from '$app/navigation';
 	import user from '$lib/stores/user';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
+	import Cookies from 'js-cookie';
+	import KEYS from '$lib/constants/cookie';
 
 	let isSubmitting = false;
 	const handleLogout = () => {
 		isSubmitting = true;
 		goto('/');
 		user.logout();
+		Cookies.remove(KEYS.IS_LOGGED_IN);
 	};
 </script>
 

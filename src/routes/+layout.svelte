@@ -5,8 +5,15 @@
 	import user from '$lib/stores/user';
 	import { navigating } from '$app/stores';
 	import { OpenAPI } from '$lib/client';
+	import type { LayoutServerData } from './$types';
+	import { setContext } from 'svelte';
+	import KEYS from '../lib/constants/cookie';
 
-	$: OpenAPI.TOKEN = $user?.access_token;
+	export let data: LayoutServerData;
+
+	OpenAPI.TOKEN = $user?.access_token;
+	console.log('ran root');
+
 </script>
 
 <Navbar appName="Todos" href="/user/todos">
@@ -14,7 +21,8 @@
 		<NavbarItem href="/" name="home" />
 	</svelte:fragment>
 	<svelte:fragment slot="end">
-		{#if $user?.access_token} <!--TODO: this has a flicker to it! -->
+		<!--TODO: this has a flicker to it! -->
+		{#if $user?.access_token}
 			<NavbarItem href="/user/logout" name="logout" />
 		{:else}
 			<NavbarItem href="/user/login" name="login" />

@@ -1,5 +1,6 @@
 import type { Token } from '$lib/client/models/Token';
 import { sessionWritable } from '@macfja/svelte-persistent-store';
+import Cookies from 'js-cookie';
 
 export type UserWithAccessToken = ({ username: string } & Token) | null;
 
