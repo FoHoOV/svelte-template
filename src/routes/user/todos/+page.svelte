@@ -17,11 +17,12 @@
 	const { form, errors, isSubmitting, reset } = createForm<z.infer<typeof schema>>({
 		extend: validator({ schema }),
 		onSubmit: async (values) => {
-			return await TodoService.createForUser({...values, is_done: false});
+			return await TodoService.createForUser({ ...values, is_done: false });
 		},
 		onSuccess: (response) => {
 			const todoItem = <Todo>response;
 			todos.addTodo(todoItem);
+			reset();
 		},
 		onError: async (error) => {
 			const apiError = <ApiError>error;
@@ -34,10 +35,6 @@
 		reset();
 	}
 </script>
-
-<TodoList />
-
-<div class="divider" />
 
 <form
 	use:form
@@ -58,3 +55,7 @@
 		</div>
 	</div>
 </form>
+
+<div class="divider" />
+
+<TodoList />

@@ -20,7 +20,7 @@
 		},
 		onSuccess: (response) => {
 			const token = <Token>response;
-			user.login(token, $data.username); // TODO: set the cookie or in local storage? but how do we access that in server side if its in local storage
+			user.login(token, $data.username); 
 			goto('/user/todos');
 		},
 		onError: (error) => {
@@ -47,7 +47,7 @@
 				type="submit"
 			/>
 		</div>
-		
+
 		<span class="divider divider-vertical" />
 
 		<a class="flex flex-col items-start self-start" href="/user/signup">
