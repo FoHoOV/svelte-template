@@ -14,7 +14,7 @@
 		<NavbarItem href="/" name="home" />
 	</svelte:fragment>
 	<svelte:fragment slot="end">
-		{#if $user?.access_token}
+		{#if $user?.access_token} <!--TODO: this has a flicker to it! -->
 			<NavbarItem href="/user/logout" name="logout" />
 		{:else}
 			<NavbarItem href="/user/login" name="login" />

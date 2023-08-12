@@ -11,6 +11,7 @@
 		return !notLoggedInRoutes.includes(<any>$page.route.id ?? '');
 	};
 
+	// TODO: this has a flicker to it!
 	$: if (browser && !$user?.access_token && isCurrentRouteProtected()) {
 		goto('/user/login');
 	}
