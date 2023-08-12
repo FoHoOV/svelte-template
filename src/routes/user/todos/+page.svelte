@@ -9,10 +9,19 @@
 	import TodoList from '$lib/components/todo/TodoList.svelte';
 	import { TodoService, type Todo, ApiError } from '$lib/client';
 	import { onMount } from 'svelte';
+	import FormError from '$lib/components/forms/FormError.svelte';
+
+	let isFetchingTodosFromServer = true;
+
+	console.log("ran page");
 
 	onMount(async () => {
+		console.log("ran page on mount");
 		todos.setTodos(await TodoService.getForUser());
+		isFetchingTodosFromServer = false;
 	});
+
+	let apiErrorTitle: string | null = null;
 
 	const { form, errors, isSubmitting, reset } = createForm<z.infer<typeof schema>>({
 		extend: validator({ schema }),
@@ -26,7 +35,7 @@
 		},
 		onError: async (error) => {
 			const apiError = <ApiError>error;
-			console.log(error); // TODO
+			apiErrorTitle = apiError.body.detail ?? apiError.message;
 		}
 	});
 
@@ -42,6 +51,7 @@
 	class="flex items-start justify-center card bg-neutral w-full flex-row"
 >
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
+		<FormError error={apiErrorTitle} />
 		<FormInput name="title" className="w-full" hideLabel={true} errors={$errors.title} />
 		<FormInput
 			name="description"
@@ -58,4 +68,8 @@
 
 <div class="divider" />
 
-<TodoList />
+{#if isFetchingTodosFromServer}
+	<span class="loading-dots" />
+{:else}
+	<TodoList />
+{/if}
