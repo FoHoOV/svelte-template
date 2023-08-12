@@ -43,8 +43,10 @@
 		"@fortawesome/free-brands-svg-icons": "^6.4.2",
 		"@fortawesome/free-regular-svg-icons": "^6.4.2",
 		"@fortawesome/free-solid-svg-icons": "^6.4.2",
+		"@types/js-cookie": "^3.0.3",
 		"daisyui": "^3.5.1",
 		"felte": "^1.2.11",
+		"js-cookie": "^3.0.5",
 		"theme-change": "^2.5.0",
 		"zod": "^3.21.4"
 	}
