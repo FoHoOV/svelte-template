@@ -6,7 +6,7 @@
 </script>
 
 {#if error}
-	<div class="alert alert-error {className}">
+	<div class="alert alert-error rounded-md {className}">
 		<Fa icon={faExclamationCircle} />
 		<span>{error}</span>
 	</div>
