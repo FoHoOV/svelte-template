@@ -1,7 +1,5 @@
 <script lang="ts">
-	import {
-		createForm,
-	} from 'felte';
+	import { createForm } from 'felte';
 	import type { PageData } from './$types';
 	import { schema } from './validator';
 	import { validator } from '@felte/validator-zod';
@@ -47,5 +45,12 @@
 				type="submit"
 			/>
 		</div>
+		
+		<span class="divider divider-vertical" />
+
+		<a class="flex flex-col items-start self-start" href="/user/login">
+			<h5>Already have an account?</h5>
+			<span>login here!</span>
+		</a>
 	</div>
 </form>

@@ -5,25 +5,21 @@
 	import user from '$lib/stores/user';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 
-	export let error: string | null = null;
-
-	const { form, isSubmitting } = createForm({
-		onSuccess: () => {
-			goto('/');
-			user.logout();
-		}
-	});
+	let isSubmitting = false;
+	const handleLogout = () => {
+		isSubmitting = true;
+		goto('/');
+		user.logout();
+	};
 </script>
 
-<form use:form>
-	<div class="flex flex-col justify-center items-center">
-		<h2>Are sure you are gonna miss out on this?</h2>
-		<LoadingButton
-			className="btn-warning mt-2"
-			text="Yes, I'm a piece of shit"
-			loading={$isSubmitting}
-			type="submit"
-		/>
-		<FormError {error} />
-	</div>
-</form>
+<div class="flex flex-col justify-center items-center">
+	<h2>Are sure you are gonna miss out on this?</h2>
+	<LoadingButton
+		className="btn-warning mt-2"
+		text="Yes, I'm a piece of shit"
+		loading={isSubmitting}
+		type="submit"
+		on:click={handleLogout}
+	/>
+</div>

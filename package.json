@@ -45,6 +45,7 @@
 		"@fortawesome/free-brands-svg-icons": "^6.4.2",
 		"@fortawesome/free-regular-svg-icons": "^6.4.2",
 		"@fortawesome/free-solid-svg-icons": "^6.4.2",
+		"@macfja/svelte-persistent-store": "^2.3.2",
 		"daisyui": "^3.5.1",
 		"felte": "^1.2.11",
 		"theme-change": "^2.5.0",

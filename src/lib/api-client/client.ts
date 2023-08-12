@@ -8,10 +8,13 @@ export const createRequest = (url: string, token?: string): Request => {
 	return request;
 };
 
-export const get = async <TResponse>(
+type ErrorHandler = <TError>(error: TError) => void;
+
+export const get = async <TResponse, TError = unknown>(
 	endPoint: string,
 	parameters: Record<string, any> = {},
-	config: RequestInit = {}
+	config: RequestInit = {},
+	onError: ErrorHandler | undefined = undefined
 ) => {
 	const res = await fetch(
 		`${import.meta.env.VITE_API_URL}${endPoint}?${new URLSearchParams(parameters)}`,
@@ -24,20 +27,22 @@ export const get = async <TResponse>(
 		}
 	);
 	const json = await res.json();
+
 	if (!res.ok) {
-		throw error(404, {
-			message: 'Some errors has occurred',
-			data: json.detail
-		});
+		if (onError) {
+			return onError(<TError>json);
+		}
+		throw Error('Some errors has occurred');
 	}
 
 	return <TResponse>json;
 };
 
-export const post = async <TResponse>(
+export const post = async <TResponse, TError = unknown>(
 	endPoint: string,
 	data: Record<string, any> = {},
-	config: RequestInit = {}
+	config: RequestInit = {},
+	onError: ErrorHandler | undefined = undefined
 ) => {
 	const res = await fetch(`${import.meta.env.VITE_API_URL}${endPoint}`, {
 		method: 'get',
@@ -47,13 +52,13 @@ export const post = async <TResponse>(
 		},
 		...config
 	});
-    
+
 	const json = await res.json();
 	if (!res.ok) {
-		throw error(404, {
-			message: 'Some errors has occurred',
-			data: json.detail
-		});
+		if (onError) {
+			return onError(<TError>json);
+		}
+		throw Error('Some errors has occurred');
 	}
 
 	return <TResponse>json;

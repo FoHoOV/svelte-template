@@ -9,12 +9,8 @@
 	import TodoList from '$lib/components/todo/TodoList.svelte';
 	import { TodoService, type Todo, ApiError } from '$lib/client';
 	import { onMount } from 'svelte';
-	import user from '$lib/stores/user';
 
 	onMount(async () => {
-		console.log('called');
-		console.log($user?.access_token);
-		console.log(await TodoService.getForUser());
 		todos.setTodos(await TodoService.getForUser());
 	});
 
