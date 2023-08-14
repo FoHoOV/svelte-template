@@ -16,7 +16,11 @@
 	const { form, errors, data, isSubmitting } = createForm<z.infer<typeof schema>>({
 		extend: validator({ schema }),
 		onSubmit: async (values) => {
-			return await UserService.signup(values);
+			return await UserService.signup({
+				username: values.username,
+				password: values.password,
+				confirm_password: values.confirmPassword
+			});
 		},
 		onSuccess: (response) => {
 			goto('/user/login');
@@ -37,15 +41,22 @@
 		<FormError error={apiErrorTitle} />
 		<FormInput name="username" className="w-full" errors={$errors.username} />
 		<FormInput name="password" className="w-full" type="password" errors={$errors.password} />
+		<FormInput
+			name="confirmPassword"
+			label="confirm password"
+			className="w-full"
+			type="password"
+			errors={$errors.confirmPassword}
+		/>
 		<div class="card-actions justify-start w-full">
 			<LoadingButton
-				className="btn-primary mt-4"
+				className="btn-primary mt-4 flex-grow"
 				text="signup"
 				loading={$isSubmitting}
 				type="submit"
 			/>
 		</div>
-		
+
 		<span class="divider divider-vertical" />
 
 		<a class="flex flex-col items-start self-start" href="/user/login">

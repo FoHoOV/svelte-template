@@ -13,15 +13,12 @@
 
 	let isFetchingTodosFromServer = true;
 
-	console.log("ran page");
-
-	onMount(async () => {
-		console.log("ran page on mount");
-		todos.setTodos(await TodoService.getForUser());
-		isFetchingTodosFromServer = false;
-	});
-
 	let apiErrorTitle: string | null = null;
+	console.log('ran page');
+
+	onMount(() => {
+		fetchTodos();
+	});
 
 	const { form, errors, isSubmitting, reset } = createForm<z.infer<typeof schema>>({
 		extend: validator({ schema }),
@@ -38,6 +35,12 @@
 			apiErrorTitle = apiError.body.detail ?? apiError.message;
 		}
 	});
+
+	async function fetchTodos() {
+		console.log('ran page on mount');
+		todos.setTodos(await TodoService.getForUser());
+		isFetchingTodosFromServer = false;
+	}
 
 	function handleReset(e: MouseEvent) {
 		e.preventDefault();
@@ -69,7 +72,7 @@
 <div class="divider" />
 
 {#if isFetchingTodosFromServer}
-	<span class="loading-dots" />
+	<span class="loading loading-ring m-auto block" />
 {:else}
 	<TodoList />
 {/if}

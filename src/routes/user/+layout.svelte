@@ -1,7 +1,7 @@
 <script lang="ts">
 	import user from '$lib/stores/user';
 	import { navigating, page } from '$app/stores';
-	import { beforeNavigate, goto } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import { isRouteProtected } from './protected-routes';
 	import { browser } from '$app/environment';
 
