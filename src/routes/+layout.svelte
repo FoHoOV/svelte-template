@@ -6,14 +6,11 @@
 	import { navigating } from '$app/stores';
 	import { OpenAPI } from '$lib/client';
 	import type { LayoutServerData } from './$types';
-	import { setContext } from 'svelte';
-	import KEYS from '../lib/constants/cookie';
 
 	export let data: LayoutServerData;
 
-	OpenAPI.TOKEN = $user?.access_token;
+	$: OpenAPI.TOKEN = $user?.access_token;
 	console.log('ran root');
-
 </script>
 
 <Navbar appName="Todos" href="/user/todos">
