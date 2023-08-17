@@ -4,7 +4,7 @@
 	export let className: string = '';
 	export let name: string;
 	export let label: string = name;
-	export let errors: string[] | null;
+	export let errors: string[] | null | undefined;
 	export let hideLabel: boolean = false;
 	export let type: 'text' | 'password' = 'text';
 </script>

@@ -1,51 +1,44 @@
 <script lang="ts">
-	import { createForm, FelteSubmitError } from 'felte';
 	import { schema } from './validator';
-	import { validator } from '@felte/validator-zod';
-	import type { z } from 'zod';
 	import FormInput from '$lib/components/forms/FormInput.svelte';
-	import { goto } from '$app/navigation';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import FormError from '$lib/components/forms/FormError.svelte';
-	import { ApiError, OAuthService } from '$lib/client';
-	import { postSvelte } from '$lib/api-client/client';
+	import { enhance } from '$app/forms';
+	import { validate } from '$lib/form-validator';
+	import type { ActionData, SubmitFunction } from './$types';
 
-	let apiErrorTitle: string | null = null;
+	export let form: ActionData;
+	$: validationErrors = form;
 
-	const { form, data, errors, isSubmitting } = createForm<z.infer<typeof schema>>({
-		extend: validator({ schema }),
-		onSubmit: async (values) => {
-			const token = await OAuthService.loginForAccessToken(values);
-			await postSvelte('/user/login', {...token});
-		},
-		onSuccess: ()=>{
-
-		},
-		onError: async (error) => {
-			if (error instanceof ApiError) {
-				const apiError = <ApiError>error;
-				apiErrorTitle = apiError.body?.detail;
-			} else {
-				apiErrorTitle = (<any>error).message ?? 'Unknown error please try again';
-			}
-		}
-	});
 </script>
+
+<pre>
+	{JSON.stringify(form)}
+</pre>
 
 <form
 	method="post"
-	use:form
+	use:validate={{ validator: schema }}
+	on:formerror={(errors) => {
+		console.log(errors);
+		validationErrors = errors.detail;
+	}}
+	use:enhance
 	class="flex items-start justify-center card bg-neutral w-full flex-row"
 >
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
-		<FormError error={apiErrorTitle} />
-		<FormInput name="username" className="w-full" errors={$errors.username} />
-		<FormInput name="password" className="w-full" type="password" errors={$errors.password} />
+		<FormInput name="username" className="w-full" errors={validationErrors?.username} />
+		<FormInput
+			name="password"
+			className="w-full"
+			type="password"
+			errors={validationErrors?.password}
+		/>
 		<div class="card-actions justify-start w-full">
 			<LoadingButton
 				className="btn-primary mt-4 flex-grow"
 				text="login"
-				loading={$isSubmitting}
+				loading={isSubmitting}
 				type="submit"
 			/>
 		</div>
