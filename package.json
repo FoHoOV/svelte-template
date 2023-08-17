@@ -49,7 +49,6 @@
 		"@types/js-cookie": "^3.0.3",
 		"@macfja/svelte-persistent-store": "^2.3.2",
 		"daisyui": "^3.5.1",
-		"felte": "^1.2.11",
 		"js-cookie": "^3.0.5",
 		"theme-change": "^2.5.0",
 		"zod": "^3.21.4"
