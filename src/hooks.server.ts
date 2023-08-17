@@ -4,7 +4,6 @@ import KEYS from '$lib/constants/cookie';
 import { isRouteProtected } from '$lib/protected-routes';
 
 export const handle: Handle = async ({ event, resolve }) => {
-	console.log('ran global handle hook');
 	const token = event.cookies.get(KEYS.token);
 	
 	if (token) {

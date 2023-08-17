@@ -11,7 +11,6 @@
 	export let data: PageData;
 
 	beforeNavigate(async ({ to, cancel }) => {
-		console.log(to);
 		if (browser && isRouteProtected(to?.route.id!) && !$page.data.token) {
 			// because if the client-side router kicks in and page does NOT
 			// have a page.server.ts which doesn't fire the hooks.server.ts then

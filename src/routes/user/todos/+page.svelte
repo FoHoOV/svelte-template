@@ -14,7 +14,6 @@
 	let isFetchingTodosFromServer = true;
 
 	let apiErrorTitle: string | null = null;
-	console.log('ran page');
 
 	onMount(() => {
 		fetchTodos();
@@ -37,7 +36,6 @@
 	});
 
 	async function fetchTodos() {
-		console.log('ran page on mount');
 		todos.setTodos(await TodoService.getForUser());
 		isFetchingTodosFromServer = false;
 	}
