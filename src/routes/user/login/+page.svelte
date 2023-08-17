@@ -1,41 +1,31 @@
 <script lang="ts">
 	import { createForm, FelteSubmitError } from 'felte';
-	import type { PageData } from './$types';
 	import { schema } from './validator';
 	import { validator } from '@felte/validator-zod';
 	import type { z } from 'zod';
 	import FormInput from '$lib/components/forms/FormInput.svelte';
-	import user from '$lib/stores/user';
 	import { goto } from '$app/navigation';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
-	import { type Token, OAuthService, ApiError } from '$lib/client';
 	import FormError from '$lib/components/forms/FormError.svelte';
-	import Cookies from 'js-cookie';
-	import KEYS from '$lib/constants/cookie';
+	import { enhance } from '$app/forms';
 
 	let apiErrorTitle: string | null = null;
 
 	const { form, data, errors, isSubmitting } = createForm<z.infer<typeof schema>>({
 		extend: validator({ schema }),
-		onSubmit: async (values) => {
-			return await OAuthService.loginForAccessToken(values);
-		},
-		onSuccess: (response) => {
-			const token = <Token>response;
-			user.login(token, $data.username); 
+		onSuccess: () => {
 			goto('/user/todos');
-			Cookies.set(KEYS.IS_LOGGED_IN, "true", {sameSite: "Strict"});
-			console.log(Cookies.get("is-logged-in"));
 		},
 		onError: (error) => {
-			const apiError = <ApiError>error;
-			apiErrorTitle = apiError.body?.detail;
+			console.log(error);
+			debugger;
 		}
 	});
 </script>
 
 <form
 	method="post"
+	use:enhance
 	use:form
 	class="flex items-start justify-center card bg-neutral w-full flex-row"
 >

@@ -1,5 +1,5 @@
 const KEYS = {
-	IS_LOGGED_IN: 'is-logged-in'
+	token: 'token'
 };
 
 export default KEYS;

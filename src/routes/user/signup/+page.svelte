@@ -5,7 +5,6 @@
 	import { validator } from '@felte/validator-zod';
 	import type { z } from 'zod';
 	import FormInput from '$lib/components/forms/FormInput.svelte';
-	import user from '$lib/stores/user';
 	import { goto } from '$app/navigation';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import FormError from '$lib/components/forms/FormError.svelte';

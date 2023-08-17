@@ -1,9 +1,11 @@
+import { PUBLIC_API_URL } from '$env/static/public';
 import { OpenAPI } from '$lib/client';
 import type { LayoutLoad } from './$types';
 
 export const ssr = true; // NOTE: setting this to false renders the correct data on page load.
-export const prerender = true;
-export const load = (async () => {
-	OpenAPI.BASE = import.meta.env.VITE_API_URL;
-	return {};
+
+export const load = (async ({ data }) => {
+	OpenAPI.BASE = PUBLIC_API_URL;
+	OpenAPI.TOKEN = data.token?.access_token;
+	return { token: data.token };
 }) satisfies LayoutLoad;

@@ -1,11 +1,16 @@
 // See https://kit.svelte.dev/docs/types#app
+
+import type { Token } from '$lib/client';
+
 // for information about these interfaces
 declare global {
 	namespace App {
 		interface Error {
 			data?: Record<string, any>;
 		}
-		// interface Locals {}
+		interface Locals {
+			token?: Token;
+		}
 		// interface PageData {}
 		// interface Platform {}
 	}
