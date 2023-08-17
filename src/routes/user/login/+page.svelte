@@ -4,28 +4,38 @@
 	import { validator } from '@felte/validator-zod';
 	import type { z } from 'zod';
 	import FormInput from '$lib/components/forms/FormInput.svelte';
-	import { goto } from '$app/navigation';
+	import { goto, invalidate, invalidateAll } from '$app/navigation';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import FormError from '$lib/components/forms/FormError.svelte';
 	import { enhance } from '$app/forms';
+	import { ApiError, OAuthService } from '$lib/client';
+	import { postSvelte } from '$lib/api-client/client';
+	import KEYS from '$lib/constants/cookie';
 
 	let apiErrorTitle: string | null = null;
 
 	const { form, data, errors, isSubmitting } = createForm<z.infer<typeof schema>>({
 		extend: validator({ schema }),
-		onSuccess: () => {
-			goto('/user/todos');
+		onSubmit: async (values) => {
+			const token = await OAuthService.loginForAccessToken(values);
+			await postSvelte('/user/login', {...token});
 		},
-		onError: (error) => {
-			console.log(error);
-			debugger;
+		onSuccess: () => {
+			goto('/user/todos', { invalidateAll: true });
+		},
+		onError: async (error) => {
+			if (error instanceof ApiError) {
+				const apiError = <ApiError>error;
+				apiErrorTitle = apiError.body?.detail;
+			} else {
+				apiErrorTitle = (<any>error).message ?? 'Unknown error please try again';
+			}
 		}
 	});
 </script>
 
 <form
 	method="post"
-	use:enhance
 	use:form
 	class="flex items-start justify-center card bg-neutral w-full flex-row"
 >

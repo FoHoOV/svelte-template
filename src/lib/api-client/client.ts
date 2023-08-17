@@ -1,3 +1,4 @@
+import { PUBLIC_API_URL } from '$env/static/public';
 import { error } from '@sveltejs/kit';
 
 export const createRequest = (url: string, token?: string): Request => {
@@ -10,22 +11,19 @@ export const createRequest = (url: string, token?: string): Request => {
 
 type ErrorHandler = <TError>(error: TError) => void;
 
-export const get = async <TResponse, TError = unknown>(
-	endPoint: string,
+export const genericGet = async <TResponse, TError = unknown>(
+	path: string,
 	parameters: Record<string, any> = {},
 	config: RequestInit = {},
 	onError: ErrorHandler | undefined = undefined
 ) => {
-	const res = await fetch(
-		`${import.meta.env.VITE_API_URL}${endPoint}?${new URLSearchParams(parameters)}`,
-		{
-			method: 'get',
-			headers: {
-				'Content-Type': 'application/json'
-			},
-			...config
-		}
-	);
+	const res = await fetch(`${path}?${new URLSearchParams(parameters)}`, {
+		method: 'get',
+		headers: {
+			'Content-Type': 'application/json'
+		},
+		...config
+	});
 	const json = await res.json();
 
 	if (!res.ok) {
@@ -38,14 +36,14 @@ export const get = async <TResponse, TError = unknown>(
 	return <TResponse>json;
 };
 
-export const post = async <TResponse, TError = unknown>(
-	endPoint: string,
+export const genericPost = async <TResponse, TError = unknown>(
+	path: string,
 	data: Record<string, any> = {},
 	config: RequestInit = {},
 	onError: ErrorHandler | undefined = undefined
 ) => {
-	const res = await fetch(`${import.meta.env.VITE_API_URL}${endPoint}`, {
-		method: 'get',
+	const res = await fetch(path, {
+		method: 'post',
 		body: JSON.stringify(data),
 		headers: {
 			'Content-Type': 'application/json'
@@ -62,4 +60,40 @@ export const post = async <TResponse, TError = unknown>(
 	}
 
 	return <TResponse>json;
+};
+
+export const getApi = async <TResponse, TError = unknown>(
+	endPoint: string,
+	data: Record<string, any> = {},
+	config: RequestInit = {},
+	onError: ErrorHandler | undefined = undefined
+) => {
+	return genericGet<TResponse, TError>(`${PUBLIC_API_URL}/${endPoint}`, data, config, onError);
+};
+
+export const getSvelte = async <TResponse, TError = unknown>(
+	endPoint: string,
+	data: Record<string, any> = {},
+	config: RequestInit = {},
+	onError: ErrorHandler | undefined = undefined
+) => {
+	return genericGet<TResponse, TError>(endPoint, data, config, onError);
+};
+
+export const postApi = async <TResponse, TError = unknown>(
+	endPoint: string,
+	data: Record<string, any> = {},
+	config: RequestInit = {},
+	onError: ErrorHandler | undefined = undefined
+) => {
+	return genericPost<TResponse, TError>(`${PUBLIC_API_URL}/${endPoint}`, data, config, onError);
+};
+
+export const postSvelte = async <TResponse, TError = unknown>(
+	endPoint: string,
+	data: Record<string, any> = {},
+	config: RequestInit = {},
+	onError: ErrorHandler | undefined = undefined
+) => {
+	return genericPost<TResponse, TError>(endPoint, data, config, onError);
 };
