@@ -4,13 +4,11 @@
 	import { validator } from '@felte/validator-zod';
 	import type { z } from 'zod';
 	import FormInput from '$lib/components/forms/FormInput.svelte';
-	import { goto, invalidate, invalidateAll } from '$app/navigation';
+	import { goto } from '$app/navigation';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import FormError from '$lib/components/forms/FormError.svelte';
-	import { enhance } from '$app/forms';
 	import { ApiError, OAuthService } from '$lib/client';
 	import { postSvelte } from '$lib/api-client/client';
-	import KEYS from '$lib/constants/cookie';
 
 	let apiErrorTitle: string | null = null;
 
