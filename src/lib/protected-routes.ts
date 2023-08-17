@@ -1,4 +1,4 @@
-import type { LayoutRouteId as UserRouteIds } from './routes/user/$types';
+import type { LayoutRouteId as UserRouteIds } from '../routes/user/$types';
 export type UnprotectedRoutes = UserRouteIds | "/"
 export const unProtectedRoutes: UnprotectedRoutes[] = ['/', '/user/login', '/user/signup'];
 
