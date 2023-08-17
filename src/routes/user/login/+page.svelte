@@ -18,8 +18,8 @@
 			const token = await OAuthService.loginForAccessToken(values);
 			await postSvelte('/user/login', {...token});
 		},
-		onSuccess: () => {
-			goto('/user/todos', { invalidateAll: true });
+		onSuccess: ()=>{
+
 		},
 		onError: async (error) => {
 			if (error instanceof ApiError) {
