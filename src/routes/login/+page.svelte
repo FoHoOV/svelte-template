@@ -1,10 +1,10 @@
 <script lang="ts">
-	import { schema } from './validator';
 	import FormInput from '$lib/components/forms/FormInput.svelte';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import { customEnhance } from '$lib/form-validator';
 	import type { ActionData } from './$types';
 	import FormError from '$lib/components/forms/FormError.svelte';
+	import { Body_login_for_access_token } from '$lib/client/zod/schemas';
 
 	export let form: ActionData;
 	let isFormSubmitting: boolean = false;
@@ -17,7 +17,7 @@
 
 <form
 	method="post"
-	use:customEnhance={{ validator: schema }}
+	use:customEnhance={{ validator: Body_login_for_access_token.strip() }}
 	on:formerror={(event) => {
 		validationErrors = event.detail;
 	}}
@@ -50,7 +50,7 @@
 
 		<span class="divider divider-vertical" />
 
-		<a class="flex flex-col items-start self-start" href="/user/signup">
+		<a class="flex flex-col items-start self-start" href="/signup">
 			<h5>Don't have an account yet?</h5>
 			<span>create one here!</span>
 		</a>

@@ -1,9 +1,9 @@
 import { fail, type Actions, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { schema } from './validator';
 import KEYS from '$lib/constants/cookie';
 import { ApiError, OAuthService } from '$lib/client';
 import { convertFormDataToObject } from '$lib/form-validator';
+import { Body_login_for_access_token } from '$lib/client/zod/schemas';
 
 export const load = (async () => {
 	return {};
@@ -13,7 +13,7 @@ export const actions: Actions = {
 	default: async ({ request, cookies }) => {
 		const formData = await request.formData();
 
-		const validationsResult = await schema.safeParseAsync(convertFormDataToObject(formData));
+		const validationsResult = await Body_login_for_access_token.strip().safeParseAsync(convertFormDataToObject(formData));
 		if (!validationsResult.success) {
 			return fail(404, validationsResult.error.flatten().fieldErrors);
 		}

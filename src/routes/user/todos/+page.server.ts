@@ -1,8 +1,8 @@
 import { fail, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { schema } from './validator';
 import { ApiError,TodoService } from '$lib/client';
 import { convertFormDataToObject } from '$lib/form-validator';
+import { TodoCreate } from '$lib/client/zod/schemas';
 
 export const load = (async () => {
 	return {};
@@ -12,7 +12,7 @@ export const actions: Actions = {
 	default: async ({ request }) => {
 		const formData = await request.formData();
 
-		const validationsResult = await schema.safeParseAsync(convertFormDataToObject(formData));
+		const validationsResult = await TodoCreate.strip().safeParseAsync(convertFormDataToObject(formData));
 		if (!validationsResult.success) {
 			return fail(404, validationsResult.error.flatten().fieldErrors);
 		}

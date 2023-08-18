@@ -1,6 +1,5 @@
 <script lang="ts">
 	import FormInput from '$lib/components/forms/FormInput.svelte';
-	import { schema } from './validator';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import TodoList from '$lib/components/todo/TodoList.svelte';
 	import FormError from '$lib/components/forms/FormError.svelte';
@@ -9,10 +8,11 @@
 	import { onMount } from 'svelte';
 	import { TodoService } from '$lib/client';
 	import todos from '$lib/stores/todos';
+	import { TodoCreate } from '$lib/client/zod/schemas';
 
 	export let form: ActionData;
 	export let formElement: HTMLFormElement;
-	$:  createTodoFormErrors = form;
+	$: createTodoFormErrors = form;
 	let isCreateTodosSubmitting = false;
 	let isFetchingTodosFromServer = true;
 
@@ -24,11 +24,10 @@
 		todos.setTodos(await TodoService.getForUser());
 		isFetchingTodosFromServer = false;
 	}
-	
 </script>
 
 <form
-	use:customEnhance={{ validator: schema }}
+	use:customEnhance={{ validator: TodoCreate.strip() }}
 	on:formerror={(event) => {
 		createTodoFormErrors = event.detail;
 	}}
@@ -43,8 +42,8 @@
 	class="flex items-start justify-center card bg-neutral w-full flex-row"
 >
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
-		<FormError error={createTodoFormErrors?.message}></FormError>
-
+		<FormError error={createTodoFormErrors?.message} />
+		<FormInput type="hidden" name="is_done" value={true} errors={''} />
 		<FormInput
 			name="title"
 			className="w-full"

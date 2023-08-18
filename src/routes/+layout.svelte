@@ -27,7 +27,6 @@
 		<NavbarItem href="/" name="home" />
 	</svelte:fragment>
 	<svelte:fragment slot="end">
-		<!--TODO: this has a flicker to it! -->
 		{#if data.token}
 			<NavbarItem href="/user/logout" name="logout" />
 		{:else}

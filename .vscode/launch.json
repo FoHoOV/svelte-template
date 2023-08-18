@@ -17,6 +17,12 @@
             "type": "node-terminal"
         },
         {
+            "command": "npm run open-api:zod",
+            "name": "npm:open-api:zod",
+            "request": "launch",
+            "type": "node-terminal"
+        },
+        {
             "type": "chrome",
             "request": "launch",
             "name": "chrome:dev",
