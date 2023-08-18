@@ -4,7 +4,7 @@
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import FormError from '$lib/components/forms/FormError.svelte';
 	import { customEnhance } from '$lib/form-validator';
-	import { UserCreate } from '$lib/client/zod/schemas';
+	import { schema } from '../login/validators';
 
 	export let form: ActionData;
 	let isFormSubmitting: boolean = false;
@@ -13,7 +13,7 @@
 
 <form
 	method="post"
-	use:customEnhance={{ validator: UserCreate.strip() }}
+	use:customEnhance={{ validator: schema }}
 	on:formerror={(event) => {
 		validationErrors = event.detail;
 	}}

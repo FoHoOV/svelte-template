@@ -4,7 +4,7 @@
 	import { customEnhance } from '$lib/form-validator';
 	import type { ActionData } from './$types';
 	import FormError from '$lib/components/forms/FormError.svelte';
-	import { Body_login_for_access_token } from '$lib/client/zod/schemas';
+	import { schema } from './validators';
 
 	export let form: ActionData;
 	let isFormSubmitting: boolean = false;
@@ -17,7 +17,7 @@
 
 <form
 	method="post"
-	use:customEnhance={{ validator: Body_login_for_access_token.strip() }}
+	use:customEnhance={{ validator: schema }}
 	on:formerror={(event) => {
 		validationErrors = event.detail;
 	}}

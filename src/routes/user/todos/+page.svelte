@@ -8,7 +8,7 @@
 	import { onMount } from 'svelte';
 	import { TodoService } from '$lib/client';
 	import todos from '$lib/stores/todos';
-	import { TodoCreate } from '$lib/client/zod/schemas';
+	import { schema } from './validator';
 
 	export let form: ActionData;
 	export let formElement: HTMLFormElement;
@@ -27,7 +27,7 @@
 </script>
 
 <form
-	use:customEnhance={{ validator: TodoCreate.strip() }}
+	use:customEnhance={{ validator: schema }}
 	on:formerror={(event) => {
 		createTodoFormErrors = event.detail;
 	}}
