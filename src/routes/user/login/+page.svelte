@@ -2,14 +2,13 @@
 	import { schema } from './validator';
 	import FormInput from '$lib/components/forms/FormInput.svelte';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
-	import FormError from '$lib/components/forms/FormError.svelte';
-	import { enhance } from '$app/forms';
-	import { validate } from '$lib/form-validator';
-	import type { ActionData, SubmitFunction } from './$types';
+	import { customEnhance } from '$lib/form-validator';
+	import type { ActionData } from './$types';
+	import { getContext } from 'svelte';
 
 	export let form: ActionData;
+	let isFormSubmitting: boolean = false;
 	$: validationErrors = form;
-
 </script>
 
 <pre>
@@ -18,12 +17,16 @@
 
 <form
 	method="post"
-	use:validate={{ validator: schema }}
+	use:customEnhance={{ validator: schema }}
 	on:formerror={(errors) => {
-		console.log(errors);
 		validationErrors = errors.detail;
 	}}
-	use:enhance
+	on:submitstarted={() => {
+		isFormSubmitting = true;
+	}}
+	on:submitended={() => {
+		isFormSubmitting = false;
+	}}
 	class="flex items-start justify-center card bg-neutral w-full flex-row"
 >
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
@@ -38,7 +41,7 @@
 			<LoadingButton
 				className="btn-primary mt-4 flex-grow"
 				text="login"
-				loading={isSubmitting}
+				loading={isFormSubmitting}
 				type="submit"
 			/>
 		</div>

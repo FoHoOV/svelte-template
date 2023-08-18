@@ -5,6 +5,8 @@
         "felteerror",
         "feltesuccess",
         "fortawesome",
+        "submitended",
+        "submitstarted",
         "Todos"
     ],
 	"typescript.preferences.importModuleSpecifier": "project-relative",

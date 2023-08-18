@@ -3,6 +3,7 @@ import type { PageServerLoad } from './$types';
 import { schema } from './validator';
 import KEYS from '$lib/constants/cookie';
 import { ApiError, OAuthService } from '$lib/client';
+import { convertFormDataToObject } from '$lib/form-validator';
 
 export const load = (async () => {
 	return {};
@@ -12,7 +13,7 @@ export const actions: Actions = {
 	default: async ({ request, cookies }) => {
 		const formData = await request.formData();
 
-		const validationsResult = await schema.safeParseAsync(formData);
+		const validationsResult = await schema.safeParseAsync(convertFormDataToObject(formData));
 		if (!validationsResult.success) {
 			return fail(404, validationsResult.error.flatten().fieldErrors);
 		}
