@@ -15,6 +15,8 @@
 			// because if the client-side router kicks in and page does NOT
 			// have a page.server.ts which doesn't fire the hooks.server.ts then
 			// the an unauthenticated user might see an authenticated page
+			// * in form submissions if the action redirects then this is called before invalidateAll
+			// doing so might cause the hooks.server.ts to run after beforeNavigation and not set the token to page.data
 			cancel();
 			await goto('/user/login');
 		}
