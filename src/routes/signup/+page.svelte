@@ -4,13 +4,14 @@
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import FormError from '$lib/components/forms/FormError.svelte';
 	import { customEnhance } from '$lib/form-validator';
-	import { schema } from '../login/validators';
+	import { schema } from './validators';
 
 	export let form: ActionData;
 	let isFormSubmitting: boolean = false;
 	$: validationErrors = form;
 </script>
 
+<!-- TODO: fix typing errors--> 
 <form
 	method="post"
 	use:customEnhance={{ validator: schema }}

@@ -2,7 +2,7 @@ import { fail, type Actions, redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { ApiError, UserService } from '$lib/client';
 import { convertFormDataToObject } from '$lib/form-validator';
-import { schema } from './validator';
+import { schema } from './validators';
 import { UserCreate } from '$lib/client/zod/schemas';
 
 export const load = (async () => {
