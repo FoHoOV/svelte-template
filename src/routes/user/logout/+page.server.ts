@@ -1,4 +1,4 @@
-import { redirect, type Actions, error } from '@sveltejs/kit';
+import { redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import KEYS from '$lib/constants/cookie';
 

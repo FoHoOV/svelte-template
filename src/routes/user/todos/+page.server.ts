@@ -1,8 +1,7 @@
-import { fail, type Actions, redirect } from '@sveltejs/kit';
+import { fail, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { schema } from './validator';
-import KEYS from '$lib/constants/cookie';
-import { ApiError, OAuthService } from '$lib/client';
+import { ApiError,TodoService } from '$lib/client';
 import { convertFormDataToObject } from '$lib/form-validator';
 
 export const load = (async () => {
@@ -10,7 +9,7 @@ export const load = (async () => {
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
-	default: async ({ request, cookies }) => {
+	default: async ({ request }) => {
 		const formData = await request.formData();
 
 		const validationsResult = await schema.safeParseAsync(convertFormDataToObject(formData));
@@ -19,9 +18,13 @@ export const actions: Actions = {
 		}
 
 		try {
-			const token = await OAuthService.loginForAccessToken(validationsResult.data);
-			cookies.set(KEYS.token, JSON.stringify(token), { secure: true, httpOnly: true, path: '/' });
-			throw redirect(303, '/user/todos');
+			const newTodo = await TodoService.createForUser({
+				...validationsResult.data,
+				is_done: false
+			});
+			return {
+				todo: newTodo
+			};
 		} catch (e) {
 			if (e instanceof ApiError) {
 				return fail(e.status, { message: e.message, data: e.body });

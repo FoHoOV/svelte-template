@@ -1,57 +1,51 @@
 <script lang="ts">
-	import { createForm } from 'felte';
-	import type { PageData } from './$types';
+	import type { ActionData } from './$types';
 	import { schema } from './validator';
-	import { validator } from '@felte/validator-zod';
-	import type { z } from 'zod';
 	import FormInput from '$lib/components/forms/FormInput.svelte';
-	import { goto } from '$app/navigation';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import FormError from '$lib/components/forms/FormError.svelte';
-	import { UserService, type ApiError, type Token } from '$lib/client';
+	import { customEnhance } from '$lib/form-validator';
 
-	let apiErrorTitle: null | string = '';
-
-	const { form, errors, data, isSubmitting } = createForm<z.infer<typeof schema>>({
-		extend: validator({ schema }),
-		onSubmit: async (values) => {
-			return await UserService.signup({
-				username: values.username,
-				password: values.password,
-				confirm_password: values.confirmPassword
-			});
-		},
-		onSuccess: (response) => {
-			goto('/user/login');
-		},
-		onError: async (error) => {
-			const apiError = <ApiError>error;
-			apiErrorTitle = apiError.body.detail?.username || apiError.body.detail;
-		}
-	});
+	export let form: ActionData;
+	let isFormSubmitting: boolean = false;
+	$: validationErrors = form;
 </script>
 
 <form
 	method="post"
-	use:form
+	use:customEnhance={{ validator: schema.innerType() }}
+	on:formerror={(event) => {
+		validationErrors = event.detail;
+	}}
+	on:submitstarted={() => {
+		isFormSubmitting = true;
+	}}
+	on:submitended={() => {
+		isFormSubmitting = false;
+	}}
 	class="flex items-start justify-center card bg-neutral w-full flex-row"
 >
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
-		<FormError error={apiErrorTitle} />
-		<FormInput name="username" className="w-full" errors={$errors.username} />
-		<FormInput name="password" className="w-full" type="password" errors={$errors.password} />
+		<FormError error={form?.message} /> <!-- TODO: fix the typings -->
+		<FormInput name="username" className="w-full" errors={validationErrors?.username} />
+		<FormInput
+			name="password"
+			className="w-full"
+			type="password"
+			errors={validationErrors?.password}
+		/>
 		<FormInput
 			name="confirmPassword"
 			label="confirm password"
 			className="w-full"
 			type="password"
-			errors={$errors.confirmPassword}
+			errors={validationErrors?.confirmPassword}
 		/>
 		<div class="card-actions justify-start w-full">
 			<LoadingButton
 				className="btn-primary mt-4 flex-grow"
 				text="signup"
-				loading={$isSubmitting}
+				loading={isFormSubmitting}
 				type="submit"
 			/>
 		</div>

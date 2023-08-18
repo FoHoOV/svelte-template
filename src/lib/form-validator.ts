@@ -2,7 +2,6 @@ import type { ZodObject, ZodRawShape, z } from 'zod';
 import type { ActionReturn } from 'svelte/action';
 import type { SubmitFunction } from '@sveltejs/kit';
 import { enhance } from '$app/forms';
-import { setContext } from 'svelte';
 
 export type ErrorsType<TSchema extends ZodRawShape> =
 	z.typeToFlattenedError<TSchema>['fieldErrors'];

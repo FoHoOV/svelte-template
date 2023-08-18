@@ -4,7 +4,7 @@
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import { customEnhance } from '$lib/form-validator';
 	import type { ActionData } from './$types';
-	import { getContext } from 'svelte';
+	import FormError from '$lib/components/forms/FormError.svelte';
 
 	export let form: ActionData;
 	let isFormSubmitting: boolean = false;
@@ -18,8 +18,8 @@
 <form
 	method="post"
 	use:customEnhance={{ validator: schema }}
-	on:formerror={(errors) => {
-		validationErrors = errors.detail;
+	on:formerror={(event) => {
+		validationErrors = event.detail;
 	}}
 	on:submitstarted={() => {
 		isFormSubmitting = true;
@@ -30,6 +30,8 @@
 	class="flex items-start justify-center card bg-neutral w-full flex-row"
 >
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
+		<FormError error={validationErrors?.message}></FormError>
+
 		<FormInput name="username" className="w-full" errors={validationErrors?.username} />
 		<FormInput
 			name="password"
