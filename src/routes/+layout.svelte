@@ -5,22 +5,21 @@
 	import { navigating, page } from '$app/stores';
 	import type { PageData } from './$types';
 	import { beforeNavigate, goto } from '$app/navigation';
-	import { isRouteProtected } from '$lib/protected-routes';
 	import { browser } from '$app/environment';
 
 	export let data: PageData;
 
-	beforeNavigate(async ({ to, cancel }) => {
-		if (browser && isRouteProtected(to?.route.id!) && !$page.data.token) {
-			// because if the client-side router kicks in and page does NOT
-			// have a page.server.ts which doesn't fire the hooks.server.ts then
-			// the an unauthenticated user might see an authenticated page
-			// * in form submissions if the action redirects then this is called before invalidateAll
-			// doing so might cause the hooks.server.ts to run after beforeNavigation and not set the token to page.data
-			cancel();
-			await goto('/user/login');
-		}
-	});
+	// beforeNavigate(async ({ to, cancel }) => {
+	// 	if (browser && isRouteProtected(to?.route.id!) && !$page.data.token) {
+	// 		// because if the client-side router kicks in and page does NOT
+	// 		// have a page.server.ts which doesn't fire the hooks.server.ts then
+	// 		// the an unauthenticated user might see an authenticated page
+	// 		// * in form submissions if the action redirects then this is called before invalidateAll
+	// 		// doing so might cause the hooks.server.ts to run after beforeNavigation and not set the token to page.data
+	// 		cancel();
+	// 		await goto('/user/login');
+	// 	}
+	// });
 </script>
 
 <Navbar appName="Todos" href="/user/todos">
@@ -32,7 +31,7 @@
 		{#if data.token}
 			<NavbarItem href="/user/logout" name="logout" />
 		{:else}
-			<NavbarItem href="/user/login" name="login" />
+			<NavbarItem href="/login" name="login" />
 		{/if}
 	</svelte:fragment>
 </Navbar>
