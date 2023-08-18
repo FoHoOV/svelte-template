@@ -55,8 +55,8 @@ export function customEnhance<TSchema extends ZodRawShape>(
 			node.dispatchEvent(new CustomEvent("submitstarted"));
 
 			return async ({ update }) => {
-				await update();
 				node.dispatchEvent(new CustomEvent("submitended"));
+				await update();
 			};
 		});
 
