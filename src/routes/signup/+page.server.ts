@@ -20,7 +20,7 @@ export const actions: Actions = {
 		}
 		return await callServiceInFormActions(async () => {
 			await UserService.signup(validationsResult.data);
-			throw redirect(303, '/user/login');
+			throw redirect(303, '/login');
 		}, UserCreate);
 	}
 } satisfies Actions;

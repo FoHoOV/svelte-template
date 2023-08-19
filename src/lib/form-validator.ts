@@ -1,5 +1,5 @@
 import type { ActionReturn } from 'svelte/action';
-import type { SubmitFunction } from '@sveltejs/kit';
+import type { ActionResult, SubmitFunction } from '@sveltejs/kit';
 import { enhance } from '$app/forms';
 
 import type { z, ZodType } from 'zod';
@@ -11,12 +11,15 @@ export type Options<TSchema extends ZodType> = {
 };
 
 export type ErrorEvent<TSchema extends ZodType> = {
-	'on:formclienterror': (e: CustomEvent<ErrorsType<TSchema>>) => void;
+	'on:submitclienterror': (e: CustomEvent<ErrorsType<TSchema>>) => void;
 };
 
-export type SubmitEvents = {
+export type SubmitEvents<TSchema extends ZodType> = {
 	'on:submitstarted'?: (e: CustomEvent<void>) => void;
 	'on:submitended'?: (e: CustomEvent<void>) => void;
+	'on:submitsucceeded'?: (
+		e: CustomEvent<{ result: Record<string, any> | undefined; data: z.infer<TSchema> }>
+	) => void;
 };
 
 export function validate<TSchema extends ZodType>(
@@ -36,7 +39,7 @@ export function validate<TSchema extends ZodType>(
 		event.preventDefault();
 		event.stopPropagation();
 		event.stopImmediatePropagation();
-		node.dispatchEvent(new CustomEvent('formclienterror', { detail: errors }));
+		node.dispatchEvent(new CustomEvent('submitclienterror', { detail: errors }));
 	};
 
 	node.addEventListener('submit', formClientSideValidateHandler);
@@ -50,31 +53,43 @@ export function validate<TSchema extends ZodType>(
 
 export function superEnhance<TSchema extends ZodType>(
 	node: HTMLFormElement
-): ActionReturn<Options<TSchema>, SubmitEvents>;
+): ActionReturn<Options<TSchema>, SubmitEvents<TSchema>>;
 export function superEnhance<TSchema extends ZodType>(
 	node: HTMLFormElement,
 	options: { submit: SubmitFunction }
-): ActionReturn<Options<TSchema>, SubmitEvents>;
+): ActionReturn<Options<TSchema>, SubmitEvents<TSchema>>;
 export function superEnhance<TSchema extends ZodType>(
 	node: HTMLFormElement,
-	options: {validator: Options<TSchema>}
-): ActionReturn<Options<TSchema>, SubmitEvents & ErrorEvent<TSchema>>;
+	options: { validator: Options<TSchema> }
+): ActionReturn<Options<TSchema>, SubmitEvents<TSchema> & ErrorEvent<TSchema>>;
 export function superEnhance<TSchema extends ZodType>(
 	node: HTMLFormElement,
-	options: {validator: Options<TSchema>} & { submit: SubmitFunction }
-): ActionReturn<Options<TSchema>, SubmitEvents & ErrorEvent<TSchema>>;
+	options: { validator: Options<TSchema> } & { submit: SubmitFunction }
+): ActionReturn<Options<TSchema>, SubmitEvents<TSchema> & ErrorEvent<TSchema>>;
 export function superEnhance<TSchema extends ZodType>(
 	node: HTMLFormElement,
 	options?: { submit?: SubmitFunction; validator?: Options<TSchema> }
 ) {
 	const handleSubmit: SubmitFunction =
 		options?.submit ||
-		(() => {
-			node.dispatchEvent(new CustomEvent('submitstarted'));
+		(({ formData }) => {
+			node.dispatchEvent(
+				new CustomEvent('submitstarted')
+			);
 
-			return async ({ update }) => {
+			return async ({ update, result }) => {
 				node.dispatchEvent(new CustomEvent('submitended'));
 				await update();
+				if (result.type == 'success') {
+					node.dispatchEvent(
+						new CustomEvent('submitsucceeded', {
+							detail: {
+								result: result.data,
+								data: Object.fromEntries(formData) 
+							}
+						})
+					);
+				}
 			};
 		});
 

@@ -29,17 +29,22 @@
 <svelte:head>
 	<title>todos</title>
 </svelte:head>
-
+<pre>
+	{JSON.stringify(form)}
+</pre>
 <form
-	use:superEnhance={{ validator: {schema} }}
-	on:formclienterror={(event) => {
-		createTodoFormErrors = event.detail;
+	use:superEnhance={{ validator: { schema } }}
+	on:submitclienterror={(e) => {
+		createTodoFormErrors = e.detail;
 	}}
 	on:submitstarted={() => {
 		isCreateTodosSubmitting = true;
 	}}
 	on:submitstarted={() => {
 		isCreateTodosSubmitting = false;
+	}}
+	on:submitsucceeded={(e) => {
+		todos.addTodo(e.detail.result?.todo);
 	}}
 	bind:this={formElement}
 	method="post"
@@ -61,7 +66,12 @@
 			errors={createTodoFormErrors?.description}
 		/>
 		<div class="card-actions justify-end w-full">
-			<LoadingButton text="add" className="flex-auto" type="submit" loading={isCreateTodosSubmitting} />
+			<LoadingButton
+				text="add"
+				className="flex-auto"
+				type="submit"
+				loading={isCreateTodosSubmitting}
+			/>
 			<LoadingButton
 				text="reset"
 				className="btn-warning"

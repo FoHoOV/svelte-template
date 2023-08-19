@@ -18,8 +18,8 @@
 <form
 	method="post"
 	use:superEnhance={{ validator: {schema} }}
-	on:formclienterror={(event) => {
-		validationErrors = event.detail;
+	on:submitclienterror={(e) => {
+		validationErrors = e.detail;
 	}}
 	on:submitstarted={() => {
 		isFormSubmitting = true;

@@ -4,10 +4,11 @@
         "felte",
         "felteerror",
         "feltesuccess",
-        "formclienterror",
         "fortawesome",
+        "submitclienterror",
         "submitended",
         "submitstarted",
+        "submitsucceeded",
         "Todos"
     ],
 	"typescript.preferences.importModuleSpecifier": "project-relative",

@@ -9,6 +9,6 @@ export const load = (async () => {
 export const actions = {
 	default: async ({ cookies }) => {
 		cookies.delete(KEYS.token, { path: '/' });
-		throw redirect(303, '/user/login');
+		throw redirect(303, '/login');
 	}
 } satisfies Actions;
