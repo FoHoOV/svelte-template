@@ -11,19 +11,18 @@
 	$: validationErrors = form;
 </script>
 
-<!-- TODO: fix typing errors--> 
+<svelte:head>
+	<title>login</title>
+</svelte:head>
+
 <form
 	method="post"
-	use:superEnhance={{ validator: schema }}
+	use:superEnhance={{ validator: {schema} }}
 	on:formclienterror={(event) => {
 		validationErrors = event.detail;
 	}}
-	on:submitstarted={() => {
-		isFormSubmitting = true;
-	}}
-	on:submitended={() => {
-		isFormSubmitting = false;
-	}}
+	on:submitstarted={() => (isFormSubmitting = true)}
+	on:submitended={() => (isFormSubmitting = false)}
 	class="flex items-start justify-center card bg-neutral w-full flex-row"
 >
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
@@ -53,7 +52,7 @@
 
 		<span class="divider divider-vertical" />
 
-		<a class="flex flex-col items-start self-start" href="/user/login">
+		<a class="flex flex-col items-start self-start" href="/login">
 			<h5>Already have an account?</h5>
 			<span>login here!</span>
 		</a>

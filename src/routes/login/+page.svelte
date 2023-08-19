@@ -11,13 +11,13 @@
 	$: validationErrors = form;
 </script>
 
-<pre>
-	{JSON.stringify(form)}
-</pre>
+<svelte:head>
+	<title>login</title>
+</svelte:head>
 
 <form
 	method="post"
-	use:superEnhance={{ validator: schema }}
+	use:superEnhance={{ validator: {schema} }}
 	on:formclienterror={(event) => {
 		validationErrors = event.detail;
 	}}
@@ -30,7 +30,7 @@
 	class="flex items-start justify-center card bg-neutral w-full flex-row"
 >
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
-		<FormError error={validationErrors?.message}></FormError>
+		<FormError error={validationErrors?.message} />
 
 		<FormInput name="username" className="w-full" errors={validationErrors?.username} />
 		<FormInput

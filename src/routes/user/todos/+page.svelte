@@ -26,8 +26,12 @@
 	}
 </script>
 
+<svelte:head>
+	<title>todos</title>
+</svelte:head>
+
 <form
-	use:superEnhance={{ validator: schema }}
+	use:superEnhance={{ validator: {schema} }}
 	on:formclienterror={(event) => {
 		createTodoFormErrors = event.detail;
 	}}
@@ -43,7 +47,7 @@
 >
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
 		<FormError error={createTodoFormErrors?.message} />
-		<FormInput type="hidden" name="is_done" value={true} errors={''} />
+		<FormInput className="hidden" type="checkbox" name="is_done" value={false} errors={''} />
 		<FormInput
 			name="title"
 			className="w-full"
@@ -57,7 +61,7 @@
 			errors={createTodoFormErrors?.description}
 		/>
 		<div class="card-actions justify-end w-full">
-			<LoadingButton text="add" className="flex-auto" loading={isCreateTodosSubmitting} />
+			<LoadingButton text="add" className="flex-auto" type="submit" loading={isCreateTodosSubmitting} />
 			<LoadingButton
 				text="reset"
 				className="btn-warning"

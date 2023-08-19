@@ -1,4 +1,7 @@
 import { PUBLIC_API_URL } from '$env/static/public';
+import type { AnyZodObject } from 'zod';
+import { ApiError } from '../client';
+import { fail } from '@sveltejs/kit';
 
 export const createRequest = (url: string, token?: string): Request => {
 	const request = new Request(url);
@@ -96,3 +99,25 @@ export const postToSvelte = async <TResponse, TError = unknown>(
 ) => {
 	return genericPost<TResponse, TError>(endPoint, data, config, onError);
 };
+
+export async function callServiceInFormActions<T>(
+	serviceCall: () => Promise<T>,
+	errorSchema: AnyZodObject
+) {
+	try {
+		return await serviceCall();
+	} catch (e) {
+		// TODO: make this error handing and api calling something generic that everybody can use
+		// other types of errors that are not validation errors should be also handled which is not handled here yet :(
+		// the success part is only for validation errors
+		// but what if server returns an array of errors for one field! :( // TODO: simulate this
+		if (e instanceof ApiError) {
+			const apiError = await errorSchema.strip().partial().safeParseAsync(e.body.detail);
+			if (apiError.success) {
+				return fail(404, apiError.data);
+			}
+			return fail(e.status, { message: e.message, data: e.body });
+		}
+		throw e;
+	}
+}

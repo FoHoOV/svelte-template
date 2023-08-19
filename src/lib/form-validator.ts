@@ -7,7 +7,7 @@ import type { z, ZodType } from 'zod';
 export type ErrorsType<T extends ZodType> = z.typeToFlattenedError<z.infer<T>>['fieldErrors'];
 
 export type Options<TSchema extends ZodType> = {
-	validator: TSchema;
+	schema: TSchema;
 };
 
 export type ErrorEvent<TSchema extends ZodType> = {
@@ -27,7 +27,7 @@ export function validate<TSchema extends ZodType>(
 		if (!options) {
 			return;
 		}
-		const errors = await getClientSideFormErrors(new FormData(node), options.validator);
+		const errors = await getClientSideFormErrors(new FormData(node), options.schema);
 
 		if (Object.keys(errors).length === 0) {
 			return;
@@ -57,15 +57,15 @@ export function superEnhance<TSchema extends ZodType>(
 ): ActionReturn<Options<TSchema>, SubmitEvents>;
 export function superEnhance<TSchema extends ZodType>(
 	node: HTMLFormElement,
-	options: Options<TSchema>
+	options: {validator: Options<TSchema>}
 ): ActionReturn<Options<TSchema>, SubmitEvents & ErrorEvent<TSchema>>;
 export function superEnhance<TSchema extends ZodType>(
 	node: HTMLFormElement,
-	options: Options<TSchema> & { submit: SubmitFunction }
+	options: {validator: Options<TSchema>} & { submit: SubmitFunction }
 ): ActionReturn<Options<TSchema>, SubmitEvents & ErrorEvent<TSchema>>;
 export function superEnhance<TSchema extends ZodType>(
 	node: HTMLFormElement,
-	options?: { submit?: SubmitFunction; validator?: Pick<Options<TSchema>, 'validator'> }
+	options?: { submit?: SubmitFunction; validator?: Options<TSchema> }
 ) {
 	const handleSubmit: SubmitFunction =
 		options?.submit ||

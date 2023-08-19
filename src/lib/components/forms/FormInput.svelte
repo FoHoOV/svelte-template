@@ -6,7 +6,7 @@
 	export let label: string = name;
 	export let errors: string | string[] | null | undefined;
 	export let hideLabel: boolean = false;
-	export let type: 'text' | 'password' | 'hidden' = 'text'; // TODO: use the build-in html input type attribute
+	export let type: 'text' | 'password' | 'hidden' | 'checkbox' = 'text'; // TODO: use the build-in html input type attribute
 	export let value: string | number | boolean | undefined = '';
 </script>
 

@@ -1,8 +1,10 @@
 import { fail, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { ApiError,TodoService } from '$lib/client';
+import { TodoService } from '$lib/client';
 import { convertFormDataToObject } from '$lib/form-validator';
 import { schema } from './validator';
+import { TodoCreate } from '$lib/client/zod/schemas';
+import { callServiceInFormActions } from '$lib/custom-client/client';
 
 export const load = (async () => {
 	return {};
@@ -17,19 +19,13 @@ export const actions: Actions = {
 			return fail(404, validationsResult.error.flatten().fieldErrors);
 		}
 
-		try {
+		return await callServiceInFormActions(async () => {
 			const newTodo = await TodoService.createForUser({
-				...validationsResult.data,
-				is_done: false
+				...validationsResult.data
 			});
 			return {
 				todo: newTodo
 			};
-		} catch (e) {
-			if (e instanceof ApiError) {
-				return fail(e.status, { message: e.message, data: e.body });
-			}
-			throw e;
-		}
+		}, TodoCreate);
 	}
 } satisfies Actions;

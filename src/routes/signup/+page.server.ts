@@ -4,6 +4,7 @@ import { ApiError, UserService } from '$lib/client';
 import { convertFormDataToObject } from '$lib/form-validator';
 import { schema } from './validators';
 import { UserCreate } from '$lib/client/zod/schemas';
+import { callServiceInFormActions } from '$lib/custom-client/client';
 
 export const load = (async () => {
 	return {};
@@ -17,26 +18,9 @@ export const actions: Actions = {
 		if (!validationsResult.success) {
 			return fail(404, validationsResult.error.flatten().fieldErrors);
 		}
-
-		try {
+		return await callServiceInFormActions(async () => {
 			await UserService.signup(validationsResult.data);
 			throw redirect(303, '/user/login');
-		} catch (e) {
-			// TODO: make this error handing and api calling something generic that everybody can use
-			// other types of errors that are not validation errors should be also handled which is not handled here yet :(
-			// the success part is only for validation errors
-			// but what if server returns an array of errors for one field! :( // TODO: simulate this
-			if (e instanceof ApiError) {
-				const apiError = await UserCreate.strip().partial().safeParseAsync(e.body.detail);
-				if (apiError.success) {
-					return fail(
-						404,
-						apiError.data
-					);
-				}
-				return fail(e.status, { message: e.message, data: e.body });
-			}
-			throw e;
-		}
+		}, UserCreate);
 	}
 } satisfies Actions;
