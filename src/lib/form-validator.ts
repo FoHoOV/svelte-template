@@ -78,6 +78,7 @@ export function superEnhance<TSchema extends ZodType>(
 			);
 
 			return async ({ update, result }) => {
+				// TODO: CustomEvent<infer param of SubmitEvent<on:submitended>
 				node.dispatchEvent(new CustomEvent('submitended'));
 				await update();
 				if (result.type == 'success') {
