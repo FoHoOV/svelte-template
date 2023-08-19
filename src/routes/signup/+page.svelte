@@ -15,7 +15,7 @@
 <form
 	method="post"
 	use:customEnhance={{ validator: schema }}
-	on:formerror={(event) => {
+	on:formclienterror={(event) => {
 		validationErrors = event.detail;
 	}}
 	on:submitstarted={() => {

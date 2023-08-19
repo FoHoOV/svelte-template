@@ -28,7 +28,7 @@
 
 <form
 	use:customEnhance={{ validator: schema }}
-	on:formerror={(event) => {
+	on:formclienterror={(event) => {
 		createTodoFormErrors = event.detail;
 	}}
 	on:submitstarted={() => {

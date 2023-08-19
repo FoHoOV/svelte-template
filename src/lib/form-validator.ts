@@ -1,17 +1,17 @@
-import type { ZodObject, ZodRawShape, z } from 'zod';
 import type { ActionReturn } from 'svelte/action';
 import type { SubmitFunction } from '@sveltejs/kit';
 import { enhance } from '$app/forms';
 
-export type ErrorsType<TSchema extends ZodRawShape> =
-	z.typeToFlattenedError<TSchema>['fieldErrors'];
+import type { z, ZodType } from 'zod';
 
-export type Options<TSchema extends ZodRawShape> = {
-	validator: ZodObject<TSchema>;
+export type ErrorsType<T extends ZodType> = z.typeToFlattenedError<z.infer<T>>['fieldErrors'];
+
+export type Options<TSchema extends ZodType> = {
+	validator: TSchema;
 };
 
-export type ErrorEvent<TSchema extends ZodRawShape> = {
-	'on:formerror': (e: CustomEvent<ErrorsType<TSchema>>) => void;
+export type ErrorEvent<TSchema extends ZodType> = {
+	'on:formclienterror': (e: CustomEvent<ErrorsType<TSchema>>) => void;
 };
 
 export type SubmitEvents = {
@@ -19,12 +19,12 @@ export type SubmitEvents = {
 	'on:submitended'?: (e: CustomEvent<void>) => void;
 };
 
-export function validate<TSchema extends ZodRawShape>(
+export function validate<TSchema extends ZodType>(
 	node: HTMLFormElement,
 	options: Options<TSchema>
 ): ActionReturn<Options<TSchema>, ErrorEvent<TSchema>> {
-	const formValidateHandler = async (event: SubmitEvent) => {
-		const errors = await getFormErrors(new FormData(node), options.validator);
+	const formClientSideValidateHandler = async (event: SubmitEvent) => {
+		const errors = await getClientSideFormErrors(new FormData(node), options.validator);
 
 		if (Object.keys(errors).length === 0) {
 			return;
@@ -36,26 +36,26 @@ export function validate<TSchema extends ZodRawShape>(
 		node.dispatchEvent(new CustomEvent('formerror', { detail: errors }));
 	};
 
-	node.addEventListener('submit', formValidateHandler);
+	node.addEventListener('submit', formClientSideValidateHandler);
 
 	return {
 		destroy() {
-			node.removeEventListener('submit', formValidateHandler);
+			node.removeEventListener('submit', formClientSideValidateHandler);
 		}
 	};
 }
 
-export function customEnhance<TSchema extends ZodRawShape>(
+export function customEnhance<TSchema extends ZodType>(
 	node: HTMLFormElement,
 	options: Options<TSchema> & { submit?: SubmitFunction }
 ): ActionReturn<Options<TSchema>, ErrorEvent<TSchema> & SubmitEvents> {
 	const handleSubmit: SubmitFunction =
 		options.submit ||
 		(() => {
-			node.dispatchEvent(new CustomEvent("submitstarted"));
+			node.dispatchEvent(new CustomEvent('submitstarted'));
 
 			return async ({ update }) => {
-				node.dispatchEvent(new CustomEvent("submitended"));
+				node.dispatchEvent(new CustomEvent('submitended'));
 				await update();
 			};
 		});
@@ -71,10 +71,10 @@ export function customEnhance<TSchema extends ZodRawShape>(
 	};
 }
 
-export async function getFormErrors<TSchema extends ZodRawShape>(
+export async function getClientSideFormErrors<TSchema extends ZodType>(
 	formData: FormData,
-	zodObject: ZodObject<TSchema>
-) {
+	zodObject: ZodType
+): Promise<ErrorsType<TSchema>> {
 	const validationsResult = await zodObject.safeParseAsync(convertFormDataToObject(formData));
 	if (validationsResult.success) {
 		return {};
