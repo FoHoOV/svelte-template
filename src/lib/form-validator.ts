@@ -24,6 +24,9 @@ export function validate<TSchema extends ZodType>(
 	options: Options<TSchema>
 ): ActionReturn<Options<TSchema>, ErrorEvent<TSchema>> {
 	const formClientSideValidateHandler = async (event: SubmitEvent) => {
+		if (!options) {
+			return;
+		}
 		const errors = await getClientSideFormErrors(new FormData(node), options.validator);
 
 		if (Object.keys(errors).length === 0) {
@@ -33,7 +36,7 @@ export function validate<TSchema extends ZodType>(
 		event.preventDefault();
 		event.stopPropagation();
 		event.stopImmediatePropagation();
-		node.dispatchEvent(new CustomEvent('formerror', { detail: errors }));
+		node.dispatchEvent(new CustomEvent('formclienterror', { detail: errors }));
 	};
 
 	node.addEventListener('submit', formClientSideValidateHandler);
@@ -45,12 +48,27 @@ export function validate<TSchema extends ZodType>(
 	};
 }
 
-export function customEnhance<TSchema extends ZodType>(
+export function superEnhance<TSchema extends ZodType>(
+	node: HTMLFormElement
+): ActionReturn<Options<TSchema>, SubmitEvents>;
+export function superEnhance<TSchema extends ZodType>(
 	node: HTMLFormElement,
-	options: Options<TSchema> & { submit?: SubmitFunction }
-): ActionReturn<Options<TSchema>, ErrorEvent<TSchema> & SubmitEvents> {
+	options: { submit: SubmitFunction }
+): ActionReturn<Options<TSchema>, SubmitEvents>;
+export function superEnhance<TSchema extends ZodType>(
+	node: HTMLFormElement,
+	options: Options<TSchema>
+): ActionReturn<Options<TSchema>, SubmitEvents & ErrorEvent<TSchema>>;
+export function superEnhance<TSchema extends ZodType>(
+	node: HTMLFormElement,
+	options: Options<TSchema> & { submit: SubmitFunction }
+): ActionReturn<Options<TSchema>, SubmitEvents & ErrorEvent<TSchema>>;
+export function superEnhance<TSchema extends ZodType>(
+	node: HTMLFormElement,
+	options?: { submit?: SubmitFunction; validator?: Pick<Options<TSchema>, 'validator'> }
+) {
 	const handleSubmit: SubmitFunction =
-		options.submit ||
+		options?.submit ||
 		(() => {
 			node.dispatchEvent(new CustomEvent('submitstarted'));
 
@@ -60,12 +78,12 @@ export function customEnhance<TSchema extends ZodType>(
 			};
 		});
 
-	const validatorReturn = validate(node, options);
+	const validatorReturn = options?.validator && validate(node, options.validator);
 	const enhanceReturn = enhance(node, handleSubmit);
 
 	return {
 		destroy() {
-			validatorReturn.destroy && validatorReturn.destroy();
+			validatorReturn?.destroy && validatorReturn.destroy();
 			enhanceReturn.destroy();
 		}
 	};

@@ -1,34 +1,21 @@
 <script lang="ts">
-	import { enhance } from '$app/forms';
+	import { page } from '$app/stores';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
-	import FormError from '../../../lib/components/forms/FormError.svelte';
-	import type { ActionData, SubmitFunction } from './$types';
-
-	export let form: ActionData;
-
-	let errorTitle: string | undefined;
+	import FormError from '$lib/components/forms/FormError.svelte';
+	import { superEnhance } from '$lib/form-validator';
 
 	let isSubmitting = false;
-	const handleSubmit = () => {
-		isSubmitting = true;
-	};
-	const handleError: SubmitFunction = () => {
-		isSubmitting = false;
-		return async ({ result, update }) => {
-			if (result.type == 'error') {
-				isSubmitting = false;
-				errorTitle = result.error.message;
-				return;
-			}
-			await update();
-		};
-	};
 </script>
 
 <div class="flex flex-col justify-center items-center">
-	<FormError error={errorTitle} />
+	<FormError error={$page.error?.message} />
 	<h2>Are sure you are gonna miss out on this?</h2>
-	<form method="post" use:enhance={handleError} on:submit={handleSubmit}>
+	<form
+		method="post"
+		use:superEnhance
+		on:submitstarted={(e) => (isSubmitting = true)}
+		on:submitended={(e) => (isSubmitting = false)}
+	>
 		<LoadingButton
 			className="btn-warning mt-2"
 			text="Yes, I'm a piece of shit"
