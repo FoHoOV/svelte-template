@@ -1,5 +1,4 @@
 import { PUBLIC_API_URL } from '$env/static/public';
-import { error } from '@sveltejs/kit';
 
 export const createRequest = (url: string, token?: string): Request => {
 	const request = new Request(url);
@@ -62,7 +61,7 @@ export const genericPost = async <TResponse, TError = unknown>(
 	return <TResponse>json;
 };
 
-export const getApi = async <TResponse, TError = unknown>(
+export const getToExternal = async <TResponse, TError = unknown>(
 	endPoint: string,
 	data: Record<string, any> = {},
 	config: RequestInit = {},
@@ -71,7 +70,7 @@ export const getApi = async <TResponse, TError = unknown>(
 	return genericGet<TResponse, TError>(`${PUBLIC_API_URL}/${endPoint}`, data, config, onError);
 };
 
-export const getSvelte = async <TResponse, TError = unknown>(
+export const getToSvelte = async <TResponse, TError = unknown>(
 	endPoint: string,
 	data: Record<string, any> = {},
 	config: RequestInit = {},
@@ -80,7 +79,7 @@ export const getSvelte = async <TResponse, TError = unknown>(
 	return genericGet<TResponse, TError>(endPoint, data, config, onError);
 };
 
-export const postApi = async <TResponse, TError = unknown>(
+export const postToExternal = async <TResponse, TError = unknown>(
 	endPoint: string,
 	data: Record<string, any> = {},
 	config: RequestInit = {},
@@ -89,7 +88,7 @@ export const postApi = async <TResponse, TError = unknown>(
 	return genericPost<TResponse, TError>(`${PUBLIC_API_URL}/${endPoint}`, data, config, onError);
 };
 
-export const postSvelte = async <TResponse, TError = unknown>(
+export const postToSvelte = async <TResponse, TError = unknown>(
 	endPoint: string,
 	data: Record<string, any> = {},
 	config: RequestInit = {},
