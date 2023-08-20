@@ -1,9 +1,9 @@
 <script lang="ts">
-	import FormInput from '$lib/components/forms/FormInput.svelte';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
-	import { superEnhance } from '$lib/form-validator';
-	import type { ActionData } from './$types';
+	import { superEnhance } from '$lib/enhance/form';
 	import FormError from '$lib/components/forms/FormError.svelte';
+	import FormInput from '$lib/components/forms/FormInput.svelte';
+	import type { ActionData } from './$types';
 	import { schema } from './validators';
 
 	export let form: ActionData;
@@ -17,7 +17,7 @@
 
 <form
 	method="post"
-	use:superEnhance={{ validator: {schema} }}
+	use:superEnhance={{ validator: { schema } }}
 	on:submitclienterror={(e) => {
 		validationErrors = e.detail;
 	}}

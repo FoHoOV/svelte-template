@@ -3,7 +3,7 @@
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import TodoList from '$lib/components/todo/TodoList.svelte';
 	import FormError from '$lib/components/forms/FormError.svelte';
-	import { superEnhance } from '$lib/form-validator';
+	import { superEnhance } from '$lib/enhance/form';
 	import type { ActionData } from './$types';
 	import { onMount } from 'svelte';
 	import { TodoService } from '$lib/client';

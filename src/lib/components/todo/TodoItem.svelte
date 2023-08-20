@@ -1,10 +1,10 @@
 <script lang="ts">
 	import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
-	import Fa from 'svelte-fa/src/fa.svelte';
 	import todos from '$lib/stores/todos';
 	import type { Todo } from '$lib/client/models/Todo';
 	import { ApiError, TodoService } from '$lib/client';
 	import FormError from '$lib/components/forms/FormError.svelte';
+	import Fa from 'svelte-fa/src/fa.svelte';
 
 	export let todo: Todo;
 	let isBeingDeleted: boolean = false;

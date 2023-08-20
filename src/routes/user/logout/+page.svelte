@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import FormError from '$lib/components/forms/FormError.svelte';
-	import { superEnhance } from '$lib/form-validator';
+	import { superEnhance } from '$lib/enhance/form';
 
 	let isSubmitting = false;
 </script>
