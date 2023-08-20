@@ -5,6 +5,7 @@ import { convertFormDataToObject } from '$lib/enhance/form';
 import { schema } from './validator';
 import { TodoCreate } from '$lib/client/zod/schemas';
 import { callServiceInFormActions } from '$lib/custom-client/client';
+import type { z } from 'zod';
 
 export const load = (async () => {
 	return {};
@@ -19,12 +20,22 @@ export const actions: Actions = {
 			return fail(404, validationsResult.error.flatten().fieldErrors);
 		}
 
-		return await callServiceInFormActions(async () => {
+		// TODO: remove this, only used for testing the result type which is any now!
+		const t = await callServiceInFormActions<{todo: z.infer<typeof TodoCreate>}>(async () => {
 			const newTodo = await TodoService.createForUser({
 				...validationsResult.data
 			});
 			return {
-				todo: newTodo
+				todo : newTodo
+			};
+		}, TodoCreate);
+
+		return await callServiceInFormActions<{todo: z.infer<typeof TodoCreate>}>(async () => {
+			const newTodo = await TodoService.createForUser({
+				...validationsResult.data
+			});
+			return {
+				todo : newTodo
 			};
 		}, TodoCreate);
 	}

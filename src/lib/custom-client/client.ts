@@ -103,7 +103,7 @@ export const postToSvelte = async <TResponse, TError = unknown>(
 export async function callServiceInFormActions<T>(
 	serviceCall: () => Promise<T>,
 	errorSchema: AnyZodObject
-) {
+) { // TODO: fix the return type
 	try {
 		return await serviceCall();
 	} catch (e) {
