@@ -5,6 +5,11 @@ import { enhance } from '$app/forms';
 import type { z, ZodType } from 'zod';
 import { validate, type ValidatorErrorEvent, type ValidatorOptions } from './validator';
 
+export type EnhanceOptions<TActionData extends Record<string, unknown>> = {
+	submit?: SubmitFunction;
+	form?: TActionData;
+};
+
 export type SubmitEvents<TSchema extends ZodType> = {
 	'on:submitstarted'?: (e: CustomEvent<void>) => void;
 	'on:submitended'?: (e: CustomEvent<void>) => void;
@@ -13,24 +18,17 @@ export type SubmitEvents<TSchema extends ZodType> = {
 	) => void;
 };
 
-export function superEnhance<TSchema extends ZodType>(
-	node: HTMLFormElement
+export function superEnhance<TSchema extends ZodType, TActionData extends Record<string, unknown>>(
+	node: HTMLFormElement,
+	options?: Partial<EnhanceOptions<TActionData>>
 ): ActionReturn<ValidatorOptions<TSchema>, SubmitEvents<TSchema>>;
-export function superEnhance<TSchema extends ZodType>(
+export function superEnhance<TSchema extends ZodType, TActionData extends Record<string, unknown>>(
 	node: HTMLFormElement,
-	options: { submit: SubmitFunction }
-): ActionReturn<ValidatorOptions<TSchema>, SubmitEvents<TSchema>>;
-export function superEnhance<TSchema extends ZodType>(
-	node: HTMLFormElement,
-	options: { validator: ValidatorOptions<TSchema> }
+	options: { validator: ValidatorOptions<TSchema> } & Partial<EnhanceOptions<TActionData>>
 ): ActionReturn<ValidatorOptions<TSchema>, SubmitEvents<TSchema> & ValidatorErrorEvent<TSchema>>;
-export function superEnhance<TSchema extends ZodType>(
+export function superEnhance<TSchema extends ZodType, TActionData extends Record<string, unknown>>(
 	node: HTMLFormElement,
-	options: { validator: ValidatorOptions<TSchema> } & { submit: SubmitFunction }
-): ActionReturn<ValidatorOptions<TSchema>, SubmitEvents<TSchema> & ValidatorErrorEvent<TSchema>>;
-export function superEnhance<TSchema extends ZodType>(
-	node: HTMLFormElement,
-	options?: { submit?: SubmitFunction; validator?: ValidatorOptions<TSchema> }
+	options?: { validator?: ValidatorOptions<TSchema> } & Partial<EnhanceOptions<TActionData>>
 ) {
 	const handleSubmit: SubmitFunction =
 		options?.submit ||
