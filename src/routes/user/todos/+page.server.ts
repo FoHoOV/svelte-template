@@ -20,17 +20,7 @@ export const actions: Actions = {
 			return fail(404, validationsResult.error.flatten().fieldErrors);
 		}
 
-		// TODO: remove this, only used for testing the result type which is any now!
-		const t = await callServiceInFormActions<{todo: z.infer<typeof TodoCreate>}>(async () => {
-			const newTodo = await TodoService.createForUser({
-				...validationsResult.data
-			});
-			return {
-				todo : newTodo
-			};
-		}, TodoCreate);
-
-		return await callServiceInFormActions<{todo: z.infer<typeof TodoCreate>}>(async () => {
+		return await callServiceInFormActions(async () => {
 			const newTodo = await TodoService.createForUser({
 				...validationsResult.data
 			});
