@@ -12,7 +12,7 @@
 </script>
 
 <svelte:head>
-	<title>login</title>
+	<title>sign up</title>
 </svelte:head>
 
 <form

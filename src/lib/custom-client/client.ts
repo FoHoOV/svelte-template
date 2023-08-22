@@ -1,5 +1,5 @@
 import { PUBLIC_API_URL } from '$env/static/public';
-import type { AnyZodObject } from 'zod';
+import type { ZodObject, ZodRawShape, z } from 'zod';
 import { ApiError } from '../client';
 import { fail } from '@sveltejs/kit';
 
@@ -100,10 +100,11 @@ export const postToSvelte = async <TResponse, TError = unknown>(
 	return genericPost<TResponse, TError>(endPoint, data, config, onError);
 };
 
-export async function callServiceInFormActions<T>(
-	serviceCall: () => Promise<T>,
-	errorSchema: AnyZodObject
-) { // TODO: fix the return type
+export async function callServiceInFormActions<
+	TPromiseReturn,
+	TZodRawShape extends ZodRawShape,
+	TSchema extends ZodObject<TZodRawShape>
+>(serviceCall: () => Promise<TPromiseReturn>, errorSchema: TSchema) {
 	try {
 		return await serviceCall();
 	} catch (e) {
@@ -112,12 +113,12 @@ export async function callServiceInFormActions<T>(
 		// the success part is only for validation errors
 		// but what if server returns an array of errors for one field! :( // TODO: simulate this
 		if (e instanceof ApiError) {
-			const apiError = await errorSchema.strip().partial().safeParseAsync(e.body.detail);
-			if (apiError.success) {
-				return fail(404, apiError.data);
+			const parsedApiError = await errorSchema.strip().partial().safeParseAsync(e.body.detail);
+			if (parsedApiError.success) {
+				return fail(404, parsedApiError.data as z.infer<TSchema>);
 			}
 			return fail(e.status, { message: e.message, data: e.body });
 		}
-		throw e;
+		//throw e;
 	}
 }

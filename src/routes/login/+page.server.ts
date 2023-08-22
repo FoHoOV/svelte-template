@@ -10,7 +10,6 @@ import { callServiceInFormActions } from '$lib/custom-client/client';
 export const load = (async () => {
 	return {};
 }) satisfies PageServerLoad;
-
 export const actions: Actions = {
 	default: async ({ request, cookies }) => {
 		const formData = await request.formData();

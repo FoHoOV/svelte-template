@@ -13,9 +13,7 @@ export type EnhanceOptions<TActionData = unknown> = {
 export type SubmitEvents<TSchema extends ZodType, TActionData = unknown> = {
 	'on:submitstarted'?: (e: CustomEvent<void>) => void;
 	'on:submitended'?: (e: CustomEvent<void>) => void;
-	'on:submitsucceeded'?: (
-		e: CustomEvent<{ result: TActionData; data: z.infer<TSchema> }>
-	) => void;
+	'on:submitsucceeded'?: (e: CustomEvent<{ result: TActionData; data: z.infer<TSchema> }>) => void;
 };
 
 export function superEnhance<TSchema extends ZodType, TActionData = unknown>(
@@ -25,7 +23,10 @@ export function superEnhance<TSchema extends ZodType, TActionData = unknown>(
 export function superEnhance<TSchema extends ZodType, TActionData = unknown>(
 	node: HTMLFormElement,
 	options: { validator: ValidatorOptions<TSchema> } & Partial<EnhanceOptions<TActionData>>
-): ActionReturn<ValidatorOptions<TSchema>, SubmitEvents<TSchema, TActionData> & ValidatorErrorEvent<TSchema>>;
+): ActionReturn<
+	ValidatorOptions<TSchema>,
+	SubmitEvents<TSchema, TActionData> & ValidatorErrorEvent<TSchema>
+>;
 export function superEnhance<TSchema extends ZodType, TActionData = unknown>(
 	node: HTMLFormElement,
 	options?: { validator?: ValidatorOptions<TSchema> } & Partial<EnhanceOptions<TActionData>>
