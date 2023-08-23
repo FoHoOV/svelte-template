@@ -119,6 +119,6 @@ export async function callServiceInFormActions<
 			}
 			return fail(e.status, { message: e.message, data: e.body });
 		}
-		//throw e;
+		throw e;
 	}
 }
