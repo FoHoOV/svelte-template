@@ -1,5 +1,7 @@
 import path from 'path'
 import skeleton from "@skeletonlabs/skeleton/tailwind/skeleton"
+import forms from "@tailwindcss/forms";
+
 module.exports = {
 	darkMode: 'class',
 	content: [
@@ -13,6 +15,7 @@ module.exports = {
 		extend: {},
 	},
 	plugins: [
+		forms,
 		...skeleton()
 	]
 }
