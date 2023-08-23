@@ -1,3 +1,9 @@
+/* 
+ALL OF THESE ARE HANDLED BY SKELETON UI
 @tailwind base;
 @tailwind components;
-@tailwind utilities;
+@tailwind utilities; 
+*/
+
+@import "@skeletonlabs/skeleton/themes/theme-modern.css";
+@import "@skeletonlabs/skeleton/styles/skeleton.css";
