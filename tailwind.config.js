@@ -15,7 +15,7 @@ module.exports = {
 		extend: {},
 	},
 	plugins: [
-		forms,
+		forms(),
 		...skeleton()
 	]
 }

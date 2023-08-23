@@ -7,3 +7,5 @@ ALL OF THESE ARE HANDLED BY SKELETON UI
 
 @import "@skeletonlabs/skeleton/themes/theme-modern.css";
 @import "@skeletonlabs/skeleton/styles/skeleton.css";
+
+html, body { @apply h-full overflow-hidden; }
