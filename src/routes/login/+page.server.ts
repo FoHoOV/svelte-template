@@ -5,7 +5,7 @@ import { OAuthService } from '$lib/client';
 import { convertFormDataToObject } from '$lib/enhance/form';
 import { schema } from './validators';
 import { Body_login_for_access_token } from '$lib/client/zod/schemas';
-import { callServiceInFormActions } from '$lib/custom-client/client';
+import { callServiceInFormActions } from '$lib/custom-client';
 
 export const load = (async () => {
 	return {};

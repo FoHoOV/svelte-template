@@ -4,7 +4,7 @@ import { TodoService } from '$lib/client';
 import { convertFormDataToObject } from '$lib/enhance/form';
 import { schema } from './validator';
 import { TodoCreate } from '$lib/client/zod/schemas';
-import { callServiceInFormActions } from '$lib/custom-client/client';
+import { callServiceInFormActions } from '$lib/custom-client';
 import type { z } from 'zod';
 
 export const load = (async () => {

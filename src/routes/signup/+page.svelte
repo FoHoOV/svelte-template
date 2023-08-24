@@ -17,7 +17,7 @@
 
 <form
 	method="post"
-	use:superEnhance={{ validator: {schema} }}
+	use:superEnhance={{ validator: { schema } }}
 	on:submitclienterror={(e) => {
 		validationErrors = e.detail;
 	}}

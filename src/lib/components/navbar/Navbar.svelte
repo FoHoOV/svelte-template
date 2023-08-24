@@ -31,11 +31,11 @@
 			<!-- this hidden checkbox controls the state -->
 			<input type="checkbox" />
 
-			<span class="swap-on" data-key="theme" data-toggle-theme="dark">
+			<span class="swap-on" data-key="theme" data-set-theme="dark">
 				<Fa icon={faSun} class="fill-current w-10 h-5" />
 			</span>
 
-			<span class="swap-off fill-current" data-key="theme" data-toggle-theme="light">
+			<span class="swap-off fill-current" data-key="theme" data-set-theme="light">
 				<Fa icon={faMoon} class="fill-current w-10 h-5" />
 			</span>
 		</label>
