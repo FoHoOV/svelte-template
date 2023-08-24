@@ -3,6 +3,7 @@
 	import { faBarsStaggered, faMoon, faSun } from '@fortawesome/free-solid-svg-icons';
 	import { themeChange } from 'theme-change';
 	import { onMount } from 'svelte';
+	import Drawer from './Drawer.svelte';
 	export let appName: string;
 	export let href: string;
 
@@ -13,20 +14,11 @@
 
 <div class="navbar shadow-2xl bg-base-100">
 	<div class="navbar-start">
-		<div class="dropdown">
-			<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-			<!-- svelte-ignore a11y-label-has-associated-control -->
-			<label tabindex="0" class="btn btn-ghost lg:hidden">
-				<Fa icon={faBarsStaggered} />
-			</label>
-			<!-- svelte-ignore a11y-no-noninteractive-tabindex -->
-			<ul
-				tabindex="0"
-				class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-2xl bg-base-100 rounded-box w-52"
-			>
-				<slot name="center" />
-			</ul>
-		</div>
+		<Drawer>
+			<svelte:fragment slot="drawer-items">
+				<slot name="start" />
+			</svelte:fragment>
+		</Drawer>
 		<a class="btn btn-ghost normal-case text-xl" {href}>{appName}</a>
 	</div>
 	<div class="navbar-center hidden lg:flex">

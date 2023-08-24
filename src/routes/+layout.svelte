@@ -23,7 +23,7 @@
 </script>
 
 <Navbar appName="Todos" href="/user/todos">
-	<svelte:fragment slot="center">
+	<svelte:fragment slot="start">
 		<NavbarItem href="/" name="home" />
 	</svelte:fragment>
 	<svelte:fragment slot="end">
