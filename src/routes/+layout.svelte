@@ -23,8 +23,8 @@
 </script>
 
 <Navbar appName="Todos" href="/user/todos">
-	<svelte:fragment slot="start">
-		<NavbarItem href="/" name="home" />
+	<svelte:fragment slot="start" let:closeDrawer>
+		<NavbarItem href="/" name="home" on:click={()=> closeDrawer()} />
 	</svelte:fragment>
 	<svelte:fragment slot="end">
 		{#if data.token}

@@ -1,18 +1,12 @@
 <script lang="ts">
 	import { faBarsStaggered } from '@fortawesome/free-solid-svg-icons';
-	import { onMount } from 'svelte';
-	import Fa from 'svelte-fa/src/fa.svelte';
+	import Fa from 'svelte-fa/src/fa.svelte';;
 
-	let navbarItemsWrapper: HTMLUListElement;
 	let showDrawer = false;
 
-	onMount(() => {
-		navbarItemsWrapper.querySelectorAll('a').forEach((element) => {
-			element.addEventListener('click', () => {
-				showDrawer = false;
-			});
-		});
-	});
+	let closeDrawer = () => {
+		showDrawer = false;
+	};
 </script>
 
 <div class="drawer">
@@ -25,14 +19,14 @@
 		</div>
 		<div class="flex-none hidden lg:inline-flex">
 			<ul class="menu menu-horizontal">
-				<slot name="drawer-items" />
+				<slot name="drawer-items" {closeDrawer} />
 			</ul>
 		</div>
 	</div>
 	<div class="drawer-side z-10">
 		<label for="navbar-drawer" class="drawer-overlay" />
-		<ul class="menu p-4 w-80 h-full bg-base-200" bind:this={navbarItemsWrapper}>
-			<slot name="drawer-items" />
+		<ul class="menu p-4 w-80 h-full bg-base-200">
+			<slot name="drawer-items" {closeDrawer} />
 		</ul>
 	</div>
 </div>

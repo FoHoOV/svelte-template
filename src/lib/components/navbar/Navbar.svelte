@@ -15,8 +15,8 @@
 <div class="navbar shadow-2xl bg-base-100">
 	<div class="navbar-start">
 		<Drawer>
-			<svelte:fragment slot="drawer-items">
-				<slot name="start" />
+			<svelte:fragment slot="drawer-items" let:closeDrawer>
+				<slot name="start" {closeDrawer} />
 			</svelte:fragment>
 		</Drawer>
 		<a class="btn btn-ghost normal-case text-xl" {href}>{appName}</a>
