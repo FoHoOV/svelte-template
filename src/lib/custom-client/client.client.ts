@@ -76,35 +76,45 @@ export async function callServiceInClient<
 		serviceCall: serviceCall,
 		isTokenRequired: isTokenRequired,
 		errorCallback: async (e) => {
-			if (e instanceof ApiError && errorCallback) {
+			let error;
+			if (e instanceof ApiError) {
 				const parsedApiError = await errorSchema?.strip().partial().safeParseAsync(e.body.detail);
 				if (parsedApiError?.success) {
-					return errorCallback({
+					error = {
 						type: 'validation error',
 						status: e.status,
 						message: e.message,
 						data: parsedApiError.data
-					});
+					};
+					if (errorCallback) {
+						return errorCallback(error);
+					}
+					Promise.reject(error);
 				}
 
-				return errorCallback({
+				error = {
 					type: 'some errors has occurred',
 					status: e.status,
 					message: e.message,
 					data: e.body
-				});
+				};
+				if (errorCallback) {
+					return errorCallback(error);
+				}
+				Promise.reject(error);
 			}
 
+			error = {
+				type: 'some errors has occurred',
+				status: -1,
+				message: 'some errors has occurred',
+				data: e
+			};
 			if (errorCallback) {
-				return errorCallback({
-					type: 'some errors has occurred',
-					status: -1,
-					message: 'some errors has occurred',
-					data: e
-				});
+				return errorCallback(error);
 			}
 
-			throw e;
+			Promise.reject(error);
 		}
 	});
 }
