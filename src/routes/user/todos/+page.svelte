@@ -2,13 +2,14 @@
 	import FormInput from '$lib/components/forms/FormInput.svelte';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import TodoList from '$lib/components/todo/TodoList.svelte';
-	import FormError from '$lib/components/forms/FormError.svelte';
+	import Error from '$components/Error.svelte';
 	import { superEnhance } from '$lib/enhance/form';
 	import type { ActionData } from './$types';
 	import { TodoService, type Todo } from '$lib/client';
 	import todos from '$lib/stores/todos';
 	import { schema } from './validator';
 	import { callServiceInClient } from '$lib/custom-client/client.client';
+	import { browser } from '$app/environment';
 
 	export let form: ActionData;
 	export let formElement: HTMLFormElement;
@@ -50,7 +51,7 @@
 	class="flex items-start justify-center card bg-base-300 w-full flex-row"
 >
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
-		<FormError error={createTodoFormErrors?.message} />
+		<Error message={createTodoFormErrors?.message} />
 		<FormInput className="hidden" type="checkbox" name="is_done" value={false} errors={''} />
 		<FormInput
 			name="title"
@@ -75,7 +76,10 @@
 				text="reset"
 				className="btn-warning"
 				type="button"
-				on:click={() => formElement.reset()}
+				on:click={() => {
+					formElement.reset();
+					createTodoFormErrors = null;
+				}}
 			/>
 		</div>
 	</div>
@@ -83,10 +87,13 @@
 
 <div class="divider" />
 
-{#await fetchTodos()}
-	<span class="loading loading-ring m-auto block" />
-{:then}
-	<TodoList />
-{:catch error}
-	<FormError error={error.message} />
-{/await}
+<!-- we should not call await without if browser here because server-side rendering will not wait for this to finish-->
+{#if browser}
+	{#await fetchTodos()}
+		<span class="loading loading-ring m-auto block" />
+	{:then}
+		<TodoList />
+	{:catch error}
+		<Error message={error.message} />
+	{/await}
+{/if}

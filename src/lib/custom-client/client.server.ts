@@ -1,7 +1,7 @@
 import type { ZodObject, ZodRawShape, z } from 'zod';
 import { ApiError } from '$lib/client';
 import { fail } from '@sveltejs/kit';
-import { callService } from './client.universal';
+import { callServiceUniversal } from './client.universal';
 
 export type FormActionsServiceCallOptions<
 	TPromiseReturn,
@@ -21,7 +21,7 @@ export async function callServiceInFormActions<
 	errorSchema,
 	isTokenRequired = true,
 }: FormActionsServiceCallOptions<TPromiseReturn, TZodRawShape, TSchema>) {
-	return await callService({
+	return await callServiceUniversal({
 		serviceCall: serviceCall,
 		isTokenRequired: isTokenRequired,
 		errorCallback: async (e) => {

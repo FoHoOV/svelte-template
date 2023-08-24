@@ -2,7 +2,7 @@
 	import type { ActionData } from './$types';
 	import FormInput from '$lib/components/forms/FormInput.svelte';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
-	import FormError from '$lib/components/forms/FormError.svelte';
+	import Error from '$components/Error.svelte';
 	import { superEnhance } from '$lib/enhance/form';
 	import { schema } from './validators';
 
@@ -26,7 +26,7 @@
 	class="flex items-start justify-center card bg-base-300 w-full flex-row"
 >
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
-		<FormError error={form?.message} />
+		<Error message={form?.message} />
 		<FormInput name="username" className="w-full" errors={validationErrors?.username} />
 		<FormInput
 			name="password"

@@ -4,7 +4,7 @@ import {
 	genericGet,
 	type ErrorHandler,
 	genericPost,
-	callService,
+	callServiceUniversal,
 	type ServiceCallOptions
 } from './client.universal';
 
@@ -41,18 +41,26 @@ export type ClientServiceCallOptions<
 > = {
 	serviceCall: () => Promise<TPromiseReturn>;
 	errorSchema?: TSchema;
+	isTokenRequired?: boolean;
 	errorCallback?: TErrorCallbackReturn extends never
 		? never
 		: (e: ErrorType<any | z.infer<TSchema>>) => TErrorCallbackReturn;
 };
 
 export async function callServiceInClient<TPromiseReturn>({
-	serviceCall
+	serviceCall,
+	isTokenRequired = true
 }: ClientServiceCallOptions<TPromiseReturn, never, never, never>): Promise<TPromiseReturn>;
 export async function callServiceInClient<TPromiseReturn, TErrorCallbackReturn>({
 	serviceCall,
+	isTokenRequired = true,
 	errorCallback: TErrorCallbackReturn
-}: ClientServiceCallOptions<TPromiseReturn, never, never, TErrorCallbackReturn>): Promise<TPromiseReturn>;
+}: ClientServiceCallOptions<
+	TPromiseReturn,
+	never,
+	never,
+	TErrorCallbackReturn
+>): Promise<TPromiseReturn>;
 export async function callServiceInClient<
 	TPromiseReturn,
 	TZodRawShape extends ZodRawShape,
@@ -60,11 +68,13 @@ export async function callServiceInClient<
 	TErrorCallbackReturn
 >({
 	serviceCall,
+	isTokenRequired = true,
 	errorSchema,
 	errorCallback
 }: ClientServiceCallOptions<TPromiseReturn, TZodRawShape, TSchema, TErrorCallbackReturn>) {
-	return await callService({
+	return await callServiceUniversal({
 		serviceCall: serviceCall,
+		isTokenRequired: isTokenRequired,
 		errorCallback: async (e) => {
 			if (e instanceof ApiError && errorCallback) {
 				const parsedApiError = await errorSchema?.strip().partial().safeParseAsync(e.body.detail);

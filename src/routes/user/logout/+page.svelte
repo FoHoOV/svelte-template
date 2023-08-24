@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
-	import FormError from '$lib/components/forms/FormError.svelte';
+	import Error from '$components/Error.svelte';
 	import { superEnhance } from '$lib/enhance/form';
 
 	let isSubmitting = false;
@@ -12,7 +12,7 @@
 </svelte:head>
 
 <div class="flex flex-col justify-center items-center">
-	<FormError error={$page.error?.message} />
+	<Error message={$page.error?.message} />
 	<h2>Are sure you are gonna miss out on this?</h2>
 	<form
 		method="post"

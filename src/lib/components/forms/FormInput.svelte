@@ -1,5 +1,5 @@
 <script lang="ts">
-	import FormError from './FormError.svelte';
+	import Error from '../Error.svelte';
 
 	export let className: string = '';
 	export let name: string;
@@ -15,5 +15,5 @@
 		<span class="label-text">{label}</span>
 	</label>
 	<input {type} id={name} {name} placeholder={label} class="input input-bordered w-full" {value} />
-	<FormError error={typeof errors === 'string' ? errors : errors?.at(0)} className="mt-2" />
+	<Error message={typeof errors === 'string' ? errors : errors?.at(0)} className="mt-2" />
 </div>

@@ -91,23 +91,26 @@ export type ServiceCallOptions<
 	TUnAuthorizedCallbackReturn = never
 > = {
 	serviceCall: () => Promise<TPromiseReturn>;
-	errorCallback: (e: unknown) => TErrorCallbackReturn;
+	errorCallback?: (e: unknown) => TErrorCallbackReturn;
 	unAuthorizedCallback?: () => TUnAuthorizedCallbackReturn;
 	isTokenRequired?: boolean;
 };
 
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 
-export function isTokenExpirationDateValid(token: string | Resolver<string> | undefined) {
+export async function isTokenExpirationDateValidAsync(
+	token: string | Resolver<string> | undefined
+) {
+	if (typeof token === 'function') {
+		token = await token({
+			url: '',
+			method: 'HEAD'
+		});
+	}
 	if (!token) {
 		return false;
 	}
-	let parsedToken: JWTPayload;
-	if (typeof token === 'string') {
-		parsedToken = decodeJwt(token);
-	} else {
-		throw Error('not implemented');
-	}
+	const parsedToken: JWTPayload = decodeJwt(token);
 	if (!parsedToken.exp) {
 		throw Error('expiration token not found in jwt');
 	}
@@ -117,7 +120,7 @@ export function isTokenExpirationDateValid(token: string | Resolver<string> | un
 	return true;
 }
 
-export async function callService<
+export async function callServiceUniversal<
 	TPromiseReturn,
 	TErrorCallbackReturn = never,
 	TUnAuthorizedCallbackReturn = never
@@ -127,7 +130,7 @@ export async function callService<
 	errorCallback,
 	isTokenRequired = true
 }: ServiceCallOptions<TPromiseReturn, TErrorCallbackReturn, TUnAuthorizedCallbackReturn>) {
-	if (isTokenRequired && !isTokenExpirationDateValid(OpenAPI.TOKEN)) {
+	if (isTokenRequired && !(await isTokenExpirationDateValidAsync(OpenAPI.TOKEN))) {
 		OpenAPI.TOKEN = undefined;
 		if (unAuthorizedCallback) {
 			return unAuthorizedCallback();
@@ -152,6 +155,9 @@ export async function callService<
 				throw redirect(303, '/login');
 			}
 		}
-		return errorCallback(e);
+		if (errorCallback) {
+			return errorCallback(e);
+		}
+		throw e;
 	}
 }
