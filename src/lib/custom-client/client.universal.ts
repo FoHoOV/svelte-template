@@ -4,7 +4,6 @@ import { PUBLIC_API_URL } from '$env/static/public';
 import { redirect } from '@sveltejs/kit';
 import { ApiError, OpenAPI } from '../client';
 import { decodeJwt, type JWTPayload } from 'jose';
-import type { ZodObject, ZodRawShape } from 'zod';
 import type { ApiRequestOptions } from '../client/core/ApiRequestOptions';
 
 export const createRequest = (url: string, token?: string): Request => {
@@ -145,7 +144,7 @@ export async function callService<
 		//TODO: error handling, what if server returns an array of errors for one field! :( // TODO: simulate this
 		if (e instanceof ApiError && e.status === 401) {
 			if (unAuthorizedCallback) {
-				//return unAuthorizedCallback();
+				return unAuthorizedCallback();
 			}
 			if (browser) {
 				goto('/login');

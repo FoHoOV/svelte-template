@@ -35,44 +35,66 @@ export type ErrorType<TData> = {
 
 export type ClientServiceCallOptions<
 	TPromiseReturn,
-	TZodRawShape extends ZodRawShape,
-	TSchema extends (ZodObject<TZodRawShape>),
+	TZodRawShape extends ZodRawShape | never,
+	TSchema extends ZodObject<TZodRawShape>,
 	TErrorCallbackReturn
 > = {
 	serviceCall: () => Promise<TPromiseReturn>;
 	errorSchema?: TSchema;
-	errorCallback?: (e: ErrorType<any | z.infer<TSchema>>) => TErrorCallbackReturn
+	errorCallback?: TErrorCallbackReturn extends never
+		? never
+		: (e: ErrorType<any | z.infer<TSchema>>) => TErrorCallbackReturn;
 };
 
+export async function callServiceInClient<TPromiseReturn>({
+	serviceCall
+}: ClientServiceCallOptions<TPromiseReturn, never, never, never>): Promise<TPromiseReturn>;
+export async function callServiceInClient<TPromiseReturn, TErrorCallbackReturn>({
+	serviceCall,
+	errorCallback: TErrorCallbackReturn
+}: ClientServiceCallOptions<TPromiseReturn, never, never, TErrorCallbackReturn>): Promise<TPromiseReturn>;
 export async function callServiceInClient<
 	TPromiseReturn,
 	TZodRawShape extends ZodRawShape,
 	TSchema extends ZodObject<TZodRawShape>,
 	TErrorCallbackReturn
->({ serviceCall, errorSchema, errorCallback }: ClientServiceCallOptions<TPromiseReturn, TZodRawShape, TSchema, TErrorCallbackReturn>) {
+>({
+	serviceCall,
+	errorSchema,
+	errorCallback
+}: ClientServiceCallOptions<TPromiseReturn, TZodRawShape, TSchema, TErrorCallbackReturn>) {
 	return await callService({
 		serviceCall: serviceCall,
 		errorCallback: async (e) => {
-			throw e;
-			// if (e instanceof ApiError) {
-			// 	const parsedApiError = await errorSchema?.strip().partial().safeParseAsync(e.body.detail);
-			// 	if (parsedApiError?.success && errorCallback) {
-			// 		return errorCallback({
-			// 			type: 'validation error',
-			// 			status: e.status,
-			// 			message: e.message,
-			// 			data: parsedApiError.data
-			// 		});
-			// 	}
+			if (e instanceof ApiError && errorCallback) {
+				const parsedApiError = await errorSchema?.strip().partial().safeParseAsync(e.body.detail);
+				if (parsedApiError?.success) {
+					return errorCallback({
+						type: 'validation error',
+						status: e.status,
+						message: e.message,
+						data: parsedApiError.data
+					});
+				}
 
-			// 	return Promise.reje({
-			// 		type: 'an unknown error has occurred',
-			// 		status: e.status,
-			// 		message: e.message,
-			// 		data: e.body
-			// 	});
-			// }
-			// throw e;
+				return errorCallback({
+					type: 'some errors has occurred',
+					status: e.status,
+					message: e.message,
+					data: e.body
+				});
+			}
+
+			if (errorCallback) {
+				return errorCallback({
+					type: 'some errors has occurred',
+					status: -1,
+					message: 'some errors has occurred',
+					data: e
+				});
+			}
+
+			throw e;
 		}
 	});
 }
