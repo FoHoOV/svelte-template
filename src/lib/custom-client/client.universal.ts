@@ -1,4 +1,11 @@
-import { PUBLIC_API_URL } from "$env/static/public";
+import { browser } from '$app/environment';
+import { goto } from '$app/navigation';
+import { PUBLIC_API_URL } from '$env/static/public';
+import { redirect } from '@sveltejs/kit';
+import { ApiError, OpenAPI } from '../client';
+import { decodeJwt, type JWTPayload } from 'jose';
+import type { ZodObject, ZodRawShape } from 'zod';
+import type { ApiRequestOptions } from '../client/core/ApiRequestOptions';
 
 export const createRequest = (url: string, token?: string): Request => {
 	const request = new Request(url);
@@ -78,3 +85,74 @@ export const postToExternal = async <TResponse, TError = unknown>(
 ) => {
 	return genericPost<TResponse, TError>(`${PUBLIC_API_URL}/${endPoint}`, data, config, onError);
 };
+
+export type ServiceCallOptions<
+	TPromiseReturn,
+	TErrorCallbackReturn = never,
+	TUnAuthorizedCallbackReturn = never
+> = {
+	serviceCall: () => Promise<TPromiseReturn>;
+	errorCallback: (e: unknown) => TErrorCallbackReturn;
+	unAuthorizedCallback?: () => TUnAuthorizedCallbackReturn;
+	isTokenRequired?: boolean;
+};
+
+type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
+
+export function isTokenExpirationDateValid(token: string | Resolver<string> | undefined) {
+	if (!token) {
+		return false;
+	}
+	let parsedToken: JWTPayload;
+	if (typeof token === 'string') {
+		parsedToken = decodeJwt(token);
+	} else {
+		throw Error('not implemented');
+	}
+	if (!parsedToken.exp) {
+		throw Error('expiration token not found in jwt');
+	}
+	if (parsedToken.exp * 1000 < Date.now()) {
+		return false;
+	}
+	return true;
+}
+
+export async function callService<
+	TPromiseReturn,
+	TErrorCallbackReturn = never,
+	TUnAuthorizedCallbackReturn = never
+>({
+	serviceCall,
+	unAuthorizedCallback,
+	errorCallback,
+	isTokenRequired = true
+}: ServiceCallOptions<TPromiseReturn, TErrorCallbackReturn, TUnAuthorizedCallbackReturn>) {
+	if (isTokenRequired && !isTokenExpirationDateValid(OpenAPI.TOKEN)) {
+		OpenAPI.TOKEN = undefined;
+		if (unAuthorizedCallback) {
+			return unAuthorizedCallback();
+		}
+		if (browser) {
+			goto('/login');
+		} else {
+			throw redirect(303, '/login');
+		}
+	}
+	try {
+		return await serviceCall();
+	} catch (e) {
+		//TODO: error handling, what if server returns an array of errors for one field! :( // TODO: simulate this
+		if (e instanceof ApiError && e.status === 401) {
+			if (unAuthorizedCallback) {
+				//return unAuthorizedCallback();
+			}
+			if (browser) {
+				goto('/login');
+			} else {
+				throw redirect(303, '/login');
+			}
+		}
+		return errorCallback(e);
+	}
+}

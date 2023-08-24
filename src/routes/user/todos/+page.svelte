@@ -5,24 +5,23 @@
 	import FormError from '$lib/components/forms/FormError.svelte';
 	import { superEnhance } from '$lib/enhance/form';
 	import type { ActionData } from './$types';
-	import { onMount } from 'svelte';
-	import { TodoService } from '$lib/client';
+	import { TodoService, type Todo } from '$lib/client';
 	import todos from '$lib/stores/todos';
 	import { schema } from './validator';
+	import { callServiceInClient } from '$lib/custom-client/client.client';
 
 	export let form: ActionData;
 	export let formElement: HTMLFormElement;
 	$: createTodoFormErrors = form;
 	let isCreateTodosSubmitting = false;
-	let isFetchingTodosFromServer = true;
-
-	onMount(() => {
-		fetchTodos();
-	});
 
 	async function fetchTodos() {
-		todos.setTodos(await TodoService.getForUser());
-		isFetchingTodosFromServer = false;
+		const fetchedTodos = await callServiceInClient({
+			serviceCall: async () => {
+				return await TodoService.getForUser();
+			}
+		});
+		todos.setTodos(fetchedTodos);
 	}
 </script>
 
@@ -84,8 +83,10 @@
 
 <div class="divider" />
 
-{#if isFetchingTodosFromServer}
+{#await fetchTodos()}
 	<span class="loading loading-ring m-auto block" />
-{:else}
+{:then}
 	<TodoList />
-{/if}
+{:catch error}
+	<FormError error={error.message} />
+{/await}

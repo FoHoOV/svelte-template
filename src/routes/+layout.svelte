@@ -4,8 +4,6 @@
 	import NavbarItem from '$lib/components/navbar/NavbarItem.svelte';
 	import { navigating, page } from '$app/stores';
 	import type { PageData } from './$types';
-	import { beforeNavigate, goto } from '$app/navigation';
-	import { browser } from '$app/environment';
 
 	export let data: PageData;
 
