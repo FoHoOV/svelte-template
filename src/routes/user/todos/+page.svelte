@@ -20,8 +20,7 @@
 		const fetchedTodos = await callServiceInClient({
 			serviceCall: async () => {
 				return await TodoService.getForUser();
-			},
-			errorSchema: undefined,
+			}
 		});
 		todos.setTodos(fetchedTodos);
 	}

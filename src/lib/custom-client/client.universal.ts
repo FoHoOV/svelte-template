@@ -149,7 +149,7 @@ export type ServiceCallOptions<
 	TSchema extends OptionalSchemaType<TZodRawShape>
 > = {
 	serviceCall: () => Promise<TPromiseReturn>;
-	errorSchema: TSchema;
+	errorSchema?: TSchema;
 	isTokenRequired?: boolean;
 	errorCallback?: (e: ServiceError<TZodRawShape, TSchema>) => TErrorCallbackReturn;
 };
