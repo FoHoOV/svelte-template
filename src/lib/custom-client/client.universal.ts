@@ -216,7 +216,7 @@ export async function callService<
 				});
 			}
 			if (browser) {
-				goto('/login');
+				await goto('/login');
 			} else {
 				throw redirect(303, '/login');
 			}
