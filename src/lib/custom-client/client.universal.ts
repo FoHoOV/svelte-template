@@ -5,6 +5,7 @@ import { redirect } from '@sveltejs/kit';
 import { ApiError, OpenAPI } from '../client';
 import { decodeJwt, type JWTPayload } from 'jose';
 import type { ApiRequestOptions } from '../client/core/ApiRequestOptions';
+import type { ZodObject, ZodRawShape, z } from 'zod';
 
 export const createRequest = (url: string, token?: string): Request => {
 	const request = new Request(url);
@@ -87,16 +88,33 @@ export const postToExternal = async <TResponse, TError = unknown>(
 
 export type ServiceCallOptions<
 	TPromiseReturn,
-	TErrorCallbackReturn = never,
-	TUnAuthorizedCallbackReturn = never
+	TZodRawShape extends ZodRawShape | never,
+	TSchema extends ZodObject<TZodRawShape>,
+	TErrorCallbackReturn
 > = {
 	serviceCall: () => Promise<TPromiseReturn>;
-	errorCallback?: (e: unknown) => TErrorCallbackReturn;
-	unAuthorizedCallback?: () => TUnAuthorizedCallbackReturn;
+	errorSchema?: TSchema;
 	isTokenRequired?: boolean;
+	errorCallback?: TErrorCallbackReturn extends never
+		? never
+		: (e: ServiceError<any | z.infer<TSchema>>) => TErrorCallbackReturn;
 };
-
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
+
+export enum ErrorType {
+	VALIDATION_ERROR,
+	API_ERROR,
+	UNKNOWN_ERROR,
+	UNAUTHORIZED
+}
+
+export type ServiceError<TData, TOriginalError = any> = {
+	type: ErrorType;
+	message: string;
+	status: number;
+	data: TData;
+	original_error: TOriginalError;
+};
 
 export async function isTokenExpirationDateValidAsync(
 	token: string | Resolver<string> | undefined
@@ -120,20 +138,52 @@ export async function isTokenExpirationDateValidAsync(
 	return true;
 }
 
-export async function callServiceUniversal<
+export async function callService<TPromiseReturn>({
+	serviceCall,
+	isTokenRequired = true
+}: ServiceCallOptions<TPromiseReturn, never, never, never>): Promise<TPromiseReturn>;
+export async function callService<TPromiseReturn, TErrorCallbackReturn>({
+	serviceCall,
+	isTokenRequired = true,
+	errorCallback: TErrorCallbackReturn
+}: ServiceCallOptions<TPromiseReturn, never, never, TErrorCallbackReturn>): Promise<TPromiseReturn>;
+export async function callService<
 	TPromiseReturn,
-	TErrorCallbackReturn = never,
-	TUnAuthorizedCallbackReturn = never
+	TZodRawShape extends ZodRawShape,
+	TSchema extends ZodObject<TZodRawShape>,
+	TErrorCallbackReturn
 >({
 	serviceCall,
-	unAuthorizedCallback,
-	errorCallback,
-	isTokenRequired = true
-}: ServiceCallOptions<TPromiseReturn, TErrorCallbackReturn, TUnAuthorizedCallbackReturn>) {
+	isTokenRequired = true,
+	errorSchema,
+	errorCallback
+}: ServiceCallOptions<
+	TPromiseReturn,
+	TZodRawShape,
+	TSchema,
+	TErrorCallbackReturn
+>): Promise<TPromiseReturn>;
+export async function callService<
+	TPromiseReturn,
+	TZodRawShape extends ZodRawShape,
+	TSchema extends ZodObject<TZodRawShape>,
+	TErrorCallbackReturn
+>({
+	serviceCall,
+	isTokenRequired = true,
+	errorSchema,
+	errorCallback
+}: ServiceCallOptions<TPromiseReturn, TZodRawShape, TSchema, TErrorCallbackReturn>) {
 	if (isTokenRequired && !(await isTokenExpirationDateValidAsync(OpenAPI.TOKEN))) {
 		OpenAPI.TOKEN = undefined;
-		if (unAuthorizedCallback) {
-			return unAuthorizedCallback();
+		if (errorCallback) {
+			return await errorCallback({
+				type: ErrorType.UNAUTHORIZED,
+				status: -1,
+				message: 'Unauthorized, token has expired.',
+				data: {},
+				original_error: null
+			});
 		}
 		if (browser) {
 			goto('/login');
@@ -145,9 +195,32 @@ export async function callServiceUniversal<
 		return await serviceCall();
 	} catch (e) {
 		//TODO: error handling, what if server returns an array of errors for one field! :( // TODO: simulate this
-		if (e instanceof ApiError && e.status === 401) {
-			if (unAuthorizedCallback) {
-				return unAuthorizedCallback();
+		let error;
+		if (!(e instanceof ApiError)) {
+			error = {
+				type: ErrorType.UNKNOWN_ERROR,
+				status: -1,
+				message: 'some errors has occurred',
+				data: e,
+				original_error: e
+			};
+
+			if (errorCallback) {
+				return await errorCallback(error);
+			}
+
+			return Promise.reject(error);
+		}
+		
+		if (e.status === 401) {
+			if (errorCallback) {
+				return await errorCallback({
+					type: ErrorType.UNAUTHORIZED,
+					status: e.status,
+					message: e.message,
+					data: e.body,
+					original_error: e
+				});
 			}
 			if (browser) {
 				goto('/login');
@@ -155,9 +228,31 @@ export async function callServiceUniversal<
 				throw redirect(303, '/login');
 			}
 		}
-		if (errorCallback) {
-			return errorCallback(e);
+		const parsedApiError = await errorSchema?.strip().partial().safeParseAsync(e.body.detail);
+		if (parsedApiError?.success) {
+			error = {
+				type: ErrorType.VALIDATION_ERROR,
+				status: e.status,
+				message: e.message,
+				data: parsedApiError.data,
+				original_error: e
+			};
+			if (errorCallback) {
+				return await errorCallback(error); // TODO: type is <any, any> and its not inferred, should we use more overloads? :(
+			}
+			return Promise.reject(error);
 		}
-		throw e;
+
+		error = {
+			type: ErrorType.API_ERROR,
+			status: e.status,
+			message: e.message,
+			data: e.body,
+			original_error: e
+		};
+		if (errorCallback) {
+			return await errorCallback(error);
+		}
+		return Promise.reject(error);
 	}
 }

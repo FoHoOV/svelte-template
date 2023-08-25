@@ -87,7 +87,7 @@
 
 <div class="divider" />
 
-<!-- we should not call await without if browser here because server-side rendering will not wait for this to finish-->
+<!-- we should not call await without <if browser> here because server-side rendering will not wait for this to finish-->
 {#if browser}
 	{#await fetchTodos()}
 		<span class="loading loading-ring m-auto block" />

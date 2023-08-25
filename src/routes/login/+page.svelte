@@ -19,7 +19,7 @@
 	method="post"
 	use:superEnhance={{ validator: { schema } }}
 	on:submitclienterror={(e) => {
-		validationErrors = e.detail;
+		validationErrors = { ...form, ...e.detail };
 	}}
 	on:submitstarted={() => {
 		isFormSubmitting = true;

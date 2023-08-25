@@ -5,7 +5,8 @@ import { OAuthService } from '$lib/client';
 import { convertFormDataToObject } from '$lib/enhance/form';
 import { schema } from './validators';
 import { Body_login_for_access_token } from '$lib/client/zod/schemas';
-import { callServiceInFormActions } from '$lib/custom-client';
+import { applyAction, callServiceInFormActions } from '$lib/custom-client';
+import { ErrorType } from '$lib/custom-client/client.universal';
 
 export const load = (async () => {
 	return {};
@@ -18,12 +19,18 @@ export const actions: Actions = {
 		if (!validationsResult.success) {
 			return fail(404, validationsResult.error.flatten().fieldErrors);
 		}
-		
+
 		return await callServiceInFormActions({
 			serviceCall: async () => {
 				const token = await OAuthService.loginForAccessToken(validationsResult.data);
 				cookies.set(KEYS.token, JSON.stringify(token), { secure: true, httpOnly: true, path: '/' });
 				throw redirect(303, '/user/todos');
+			},
+			errorCallback: async (e) => {
+				if(e.type === ErrorType.UNAUTHORIZED){
+					return fail(401, {message: e.data.detail})
+				}
+				return await applyAction(e)
 			},
 			isTokenRequired: false,
 			errorSchema: Body_login_for_access_token

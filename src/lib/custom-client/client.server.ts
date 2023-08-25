@@ -1,38 +1,43 @@
-import type { ZodObject, ZodRawShape, z } from 'zod';
-import { ApiError } from '$lib/client';
-import { fail } from '@sveltejs/kit';
-import { callServiceUniversal } from './client.universal';
+import type { ZodObject, ZodRawShape } from 'zod';
+import { fail, redirect } from '@sveltejs/kit';
+import {
+	callService,
+	ErrorType,
+	type ServiceCallOptions,
+	type ServiceError
+} from './client.universal';
 
-export type FormActionsServiceCallOptions<
-	TPromiseReturn,
-	TZodRawShape extends ZodRawShape,
-	TSchema extends ZodObject<TZodRawShape>
-> = {
-	serviceCall: () => Promise<TPromiseReturn>;
-	errorSchema: TSchema;
-	isTokenRequired?: boolean;
-};
+export async function applyAction(e: ServiceError<any, any>) {
+	switch (e.type) {
+		case (ErrorType.API_ERROR, ErrorType.VALIDATION_ERROR):
+			return fail(e.status, { message: e.message, data: e.data });
+		case ErrorType.UNAUTHORIZED:
+			throw redirect(303, '/login');
+		default:
+			throw e.original_error;
+	}
+}
+
 export async function callServiceInFormActions<
 	TPromiseReturn,
 	TZodRawShape extends ZodRawShape,
-	TSchema extends ZodObject<TZodRawShape>
+	TSchema extends ZodObject<TZodRawShape>,
+	TErrorCallbackReturn
 >({
 	serviceCall,
-	errorSchema,
 	isTokenRequired = true,
-}: FormActionsServiceCallOptions<TPromiseReturn, TZodRawShape, TSchema>) {
-	return await callServiceUniversal({
+	errorSchema,
+	errorCallback
+}: ServiceCallOptions<TPromiseReturn, TZodRawShape, TSchema, TErrorCallbackReturn>) {
+	return await callService({
 		serviceCall: serviceCall,
 		isTokenRequired: isTokenRequired,
+		errorSchema: errorSchema,
 		errorCallback: async (e) => {
-			if (e instanceof ApiError) {
-				const parsedApiError = await errorSchema.strip().partial().safeParseAsync(e.body.detail);
-				if (parsedApiError.success) {
-					return fail(404, parsedApiError.data as z.infer<TSchema>);
-				}
-				return fail(e.status, { message: e.message, data: e.body });
+			if (errorCallback) {
+				return await errorCallback(e);
 			}
-			throw e;
+			return await applyAction(e);
 		}
 	});
 }
