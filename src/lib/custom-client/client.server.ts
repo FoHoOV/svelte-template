@@ -1,16 +1,20 @@
-import type { ZodObject, ZodRawShape } from 'zod';
+import type { ZodRawShape } from 'zod';
 import { fail, redirect } from '@sveltejs/kit';
 import {
 	callService,
 	ErrorType,
+	type OptionalSchemaType,
 	type ServiceCallOptions,
 	type ServiceError
 } from './client.universal';
 
-export async function applyAction(e: ServiceError<any, any>) {
+export async function applyAction<
+	TZodRawShape extends ZodRawShape | undefined,
+	TSchema extends OptionalSchemaType<TZodRawShape>
+>(e: ServiceError<TZodRawShape, TSchema>) {
 	switch (e.type) {
 		case (ErrorType.API_ERROR, ErrorType.VALIDATION_ERROR):
-			return fail(e.status, { message: e.message, data: e.data });
+			return fail(e.status, { message: e.message, data: e });
 		case ErrorType.UNAUTHORIZED:
 			throw redirect(303, '/login');
 		default:
@@ -20,15 +24,15 @@ export async function applyAction(e: ServiceError<any, any>) {
 
 export async function callServiceInFormActions<
 	TPromiseReturn,
-	TZodRawShape extends ZodRawShape,
-	TSchema extends ZodObject<TZodRawShape>,
-	TErrorCallbackReturn
+	TErrorCallbackReturn,
+	TZodRawShape extends ZodRawShape | undefined,
+	TSchema extends OptionalSchemaType<TZodRawShape>
 >({
 	serviceCall,
 	isTokenRequired = true,
 	errorSchema,
 	errorCallback
-}: ServiceCallOptions<TPromiseReturn, TZodRawShape, TSchema, TErrorCallbackReturn>) {
+}: ServiceCallOptions<TPromiseReturn, TErrorCallbackReturn, TZodRawShape, TSchema>) {
 	return await callService({
 		serviceCall: serviceCall,
 		isTokenRequired: isTokenRequired,

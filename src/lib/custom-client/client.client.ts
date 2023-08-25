@@ -4,7 +4,8 @@ import {
 	type ErrorHandler,
 	genericPost,
 	type ServiceCallOptions,
-	callService
+	callService,
+	type OptionalSchemaType
 } from './client.universal';
 
 export const getToSvelte = async <TResponse, TError = unknown>(
@@ -27,19 +28,19 @@ export const postToSvelte = async <TResponse, TError = unknown>(
 
 export async function callServiceInClient<
 	TPromiseReturn,
-	TZodRawShape extends ZodRawShape,
-	TSchema extends ZodObject<TZodRawShape>,
-	TErrorCallbackReturn
+	TErrorCallbackReturn,
+	TZodRawShape extends ZodRawShape | undefined,
+	TSchema extends OptionalSchemaType<TZodRawShape>
 >({
 	serviceCall,
 	isTokenRequired = true,
 	errorSchema,
 	errorCallback
-}: ServiceCallOptions<TPromiseReturn, TZodRawShape, TSchema, TErrorCallbackReturn>) {
+}: ServiceCallOptions<TPromiseReturn, TErrorCallbackReturn, TZodRawShape, TSchema>) {
 	return await callService({
 		serviceCall: serviceCall,
 		isTokenRequired: isTokenRequired,
 		errorSchema: errorSchema,
 		errorCallback: errorCallback
-	})
+	});
 }

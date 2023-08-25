@@ -29,6 +29,9 @@ export const actions: Actions = {
 			errorCallback: async (e) => {
 				if(e.type === ErrorType.UNAUTHORIZED){
 					return fail(401, {message: e.data.detail})
+				}else if (e.type === ErrorType.VALIDATION_ERROR){
+					return fail(0, {message: e.data.username}) //TODO: remove and type should be schema
+				//								^?
 				}
 				return await applyAction(e)
 			},
