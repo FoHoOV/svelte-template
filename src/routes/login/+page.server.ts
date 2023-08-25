@@ -20,6 +20,27 @@ export const actions: Actions = {
 			return fail(404, validationsResult.error.flatten().fieldErrors);
 		}
 
+		const a = await callServiceInFormActions({
+			serviceCall: async () => {
+				return await OAuthService.loginForAccessToken(validationsResult.data);
+			},
+			errorCallback: async (e) => {
+				if(e.type === ErrorType.UNAUTHORIZED){
+					return fail(401, {message: e.data.detail})
+				}
+				return await applyAction(e)
+			},
+			isTokenRequired: false,
+			errorSchema: Body_login_for_access_token
+		});
+
+		// d is expected to be of type {success, serviceCallResult} or ActionFailure
+		// because 
+		type d = typeof a;
+		//   ^?
+		// 	a.serviceCallResult is expected to exist
+		type g = a.serviceCallResult
+		//   ^?
 		return await callServiceInFormActions({
 			serviceCall: async () => {
 				const token = await OAuthService.loginForAccessToken(validationsResult.data);
@@ -29,9 +50,6 @@ export const actions: Actions = {
 			errorCallback: async (e) => {
 				if(e.type === ErrorType.UNAUTHORIZED){
 					return fail(401, {message: e.data.detail})
-				}else if (e.type === ErrorType.VALIDATION_ERROR){
-					return fail(0, {message: e.data.username}) //TODO: remove and type should be schema
-				//								^?
 				}
 				return await applyAction(e)
 			},

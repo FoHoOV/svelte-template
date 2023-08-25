@@ -125,21 +125,21 @@ export type ServiceError<
 			message: string;
 			status: number;
 			data: z.infer<NonNullable<TSchema>>; // TODO: we should error if TSchema is undefined here
-			original_error: ApiError;
+			originalError: ApiError;
 	  }
 	| {
 			type: ErrorType.API_ERROR;
 			message: string;
 			status: number;
 			data: any;
-			original_error: ApiError;
+			originalError: ApiError;
 	  }
 	| {
 			type: ErrorType.UNKNOWN_ERROR | ErrorType.UNAUTHORIZED;
 			message: string;
 			status: number;
 			data: any;
-			original_error: unknown;
+			originalError: unknown;
 	  };
 
 export type ServiceCallOptions<
@@ -151,14 +151,14 @@ export type ServiceCallOptions<
 	serviceCall: () => Promise<TPromiseReturn>;
 	errorSchema?: TSchema;
 	isTokenRequired?: boolean;
-	errorCallback?: (e: ServiceError<TZodRawShape, TSchema>) => TErrorCallbackReturn;
+	errorCallback?: (e: ServiceError<TZodRawShape, TSchema>) => Promise<TErrorCallbackReturn>;
 };
 
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 
 export async function callService<
 	TPromiseReturn,
-	TErrorCallbackReturn,
+	TErrorCallbackPromiseReturn,
 	TZodRawShape extends ZodRawShape | undefined,
 	TSchema extends OptionalSchemaType<TZodRawShape>
 >({
@@ -166,7 +166,7 @@ export async function callService<
 	isTokenRequired = true,
 	errorSchema,
 	errorCallback
-}: ServiceCallOptions<TPromiseReturn, TErrorCallbackReturn, TZodRawShape, TSchema>) {
+}: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TZodRawShape, TSchema>) {
 	if (isTokenRequired && !(await isTokenExpirationDateValidAsync(OpenAPI.TOKEN))) {
 		OpenAPI.TOKEN = undefined;
 		if (errorCallback) {
@@ -175,17 +175,20 @@ export async function callService<
 				status: -1,
 				message: 'Unauthorized, token has expired.',
 				data: {},
-				original_error: null
+				originalError: null
 			});
 		}
 		if (browser) {
-			await goto('/login');
+			throw await goto('/login');
 		} else {
 			throw redirect(303, '/login');
 		}
 	}
 	try {
-		return await serviceCall();
+		return {
+			success: true,
+			serviceCallResult: await serviceCall()
+		};
 	} catch (e) {
 		//TODO: error handling, what if server returns an array of errors for one field! :( // TODO: simulate this
 		let error: ServiceError<TZodRawShape, TSchema>;
@@ -195,14 +198,13 @@ export async function callService<
 				status: -1,
 				message: 'some errors has occurred',
 				data: e,
-				original_error: e
+				originalError: e
 			};
 
 			if (errorCallback) {
 				return await errorCallback(error);
 			}
-
-			return Promise.reject(error);
+			throw error;
 		}
 
 		if (e.status === 401) {
@@ -212,11 +214,11 @@ export async function callService<
 					status: e.status,
 					message: e.message,
 					data: e.body,
-					original_error: e
+					originalError: e
 				});
 			}
 			if (browser) {
-				await goto('/login');
+				throw await goto('/login');
 			} else {
 				throw redirect(303, '/login');
 			}
@@ -228,12 +230,12 @@ export async function callService<
 				status: e.status,
 				message: e.message,
 				data: parsedApiError.data,
-				original_error: e
+				originalError: e
 			};
 			if (errorCallback) {
-				return await errorCallback(error); // TODO: type is <any, any> and its not inferred, should we use more overloads? :(
+				return await errorCallback(error);
 			}
-			return Promise.reject(error);
+			throw error;
 		}
 
 		error = {
@@ -241,11 +243,11 @@ export async function callService<
 			status: e.status,
 			message: e.message,
 			data: e.body,
-			original_error: e
+			originalError: e
 		};
 		if (errorCallback) {
 			return await errorCallback(error);
 		}
-		return Promise.reject(error);
+		throw error;
 	}
 }

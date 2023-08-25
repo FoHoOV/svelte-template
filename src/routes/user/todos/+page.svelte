@@ -35,7 +35,7 @@
 <form
 	use:superEnhance={{ validator: { schema }, form: form }}
 	on:submitclienterror={(e) => {
-		createTodoFormErrors = e.detail;
+		createTodoFormErrors ={...form, ...e.detail };
 	}}
 	on:submitstarted={() => {
 		isCreateTodosSubmitting = true;
@@ -44,7 +44,7 @@
 		isCreateTodosSubmitting = false;
 	}}
 	on:submitsucceeded={(e) => {
-		e.detail.result.todo && todos.addTodo(e.detail.result.todo);
+		e.detail.result.success && todos.addTodo(e.detail.result.serviceCallResult);
 	}}
 	bind:this={formElement}
 	method="post"

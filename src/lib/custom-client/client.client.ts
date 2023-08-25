@@ -28,7 +28,7 @@ export const postToSvelte = async <TResponse, TError = unknown>(
 
 export async function callServiceInClient<
 	TPromiseReturn,
-	TErrorCallbackReturn,
+	TErrorCallbackPromiseReturn,
 	TZodRawShape extends ZodRawShape | undefined,
 	TSchema extends OptionalSchemaType<TZodRawShape>
 >({
@@ -36,7 +36,7 @@ export async function callServiceInClient<
 	isTokenRequired = true,
 	errorSchema,
 	errorCallback
-}: ServiceCallOptions<TPromiseReturn, TErrorCallbackReturn, TZodRawShape, TSchema>) {
+}: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TZodRawShape, TSchema>) {
 	return await callService({
 		serviceCall: serviceCall,
 		isTokenRequired: isTokenRequired,

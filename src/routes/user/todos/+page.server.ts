@@ -21,12 +21,9 @@ export const actions: Actions = {
 
 		return await callServiceInFormActions({
 			serviceCall: async () => {
-				const newTodo = await TodoService.createForUser({
+				return  await TodoService.createForUser({
 					...validationsResult.data
 				});
-				return {
-					todo: newTodo
-				};
 			},
 			errorSchema: TodoCreate
 		});

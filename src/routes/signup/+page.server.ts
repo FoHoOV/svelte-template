@@ -18,13 +18,12 @@ export const actions: Actions = {
 		if (!validationsResult.success) {
 			return fail(404, validationsResult.error.flatten().fieldErrors);
 		}
-
 		return await callServiceInFormActions({
 			serviceCall: async () => {
 				await UserService.signup(validationsResult.data);
 				throw redirect(303, '/login');
 			},
-			isTokenRequired:false,
+			isTokenRequired: false,
 			errorSchema: UserCreate
 		});
 	}

@@ -18,13 +18,13 @@ export async function applyAction<
 		case ErrorType.UNAUTHORIZED:
 			throw redirect(303, '/login');
 		default:
-			throw e.original_error;
+			throw e.originalError;
 	}
 }
 
 export async function callServiceInFormActions<
 	TPromiseReturn,
-	TErrorCallbackReturn,
+	TErrorCallbackPromiseReturn,
 	TZodRawShape extends ZodRawShape | undefined,
 	TSchema extends OptionalSchemaType<TZodRawShape>
 >({
@@ -32,14 +32,14 @@ export async function callServiceInFormActions<
 	isTokenRequired = true,
 	errorSchema,
 	errorCallback
-}: ServiceCallOptions<TPromiseReturn, TErrorCallbackReturn, TZodRawShape, TSchema>) {
+}: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TZodRawShape, TSchema>) {
 	return await callService({
 		serviceCall: serviceCall,
 		isTokenRequired: isTokenRequired,
 		errorSchema: errorSchema,
 		errorCallback: async (e) => {
 			if (errorCallback) {
-				return await errorCallback(e);
+				 return await errorCallback(e);
 			}
 			return await applyAction(e);
 		}
