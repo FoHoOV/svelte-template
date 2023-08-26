@@ -26,17 +26,9 @@ export function failedActionData<T>({ message, data }: FailedActionProps<T>) {
 	return { message, data };
 }
 
-export function superFail(
-	status: NumberRange<400, 600>,
-	{ message }: FailedActionProps<undefined>
-): ActionFailure<{ message: ErrorMessage; data: undefined }>;
-export function superFail<T>(
-	status: NumberRange<400, 600>,
-	{ message, data }: FailedActionProps<T>
-): ActionFailure<{ message: ErrorMessage; data: T }>;
-export function superFail<T>(
+export function superFail<T = undefined>(
 	status: NumberRange<400, 600>,
 	{ message, data }: FailedActionProps<T>
 ) {
-	return fail(status, { message, data });
+	return fail(status, failedActionData({ message, data }));
 }

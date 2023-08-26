@@ -19,7 +19,7 @@
 	method="post"
 	use:superEnhance={{ validator: { schema } }}
 	on:submitclienterror={(e) => {
-				validationErrors = {
+		validationErrors = {
 			...form,
 			...{ data: e.detail, message: 'Invalid form, please review your inputs' }
 		};
