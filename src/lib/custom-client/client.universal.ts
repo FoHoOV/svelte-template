@@ -1,7 +1,7 @@
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 import { PUBLIC_API_URL } from '$env/static/public';
-import { redirect } from '@sveltejs/kit';
+import { Redirect_1, redirect } from '@sveltejs/kit';
 import { ApiError, OpenAPI } from '../client';
 import { decodeJwt, type JWTPayload } from 'jose';
 import type { ApiRequestOptions } from '../client/core/ApiRequestOptions';
@@ -166,20 +166,34 @@ export async function callService<
 	isTokenRequired = true,
 	errorSchema,
 	errorCallback
-}: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TZodRawShape, TSchema>) {
+}: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TZodRawShape, TSchema>): Promise<
+	| { success: true; data: Awaited<TPromiseReturn> }
+	| { success: false; error: Awaited<TErrorCallbackPromiseReturn> }
+> {
 	if (isTokenRequired && !(await isTokenExpirationDateValidAsync(OpenAPI.TOKEN))) {
 		OpenAPI.TOKEN = undefined;
+
 		if (errorCallback) {
-			return await errorCallback({
+			return {
+				success: false,
+				error: await errorCallback({
+					type: ErrorType.UNAUTHORIZED,
+					status: -1,
+					message: 'Unauthorized, token has expired.',
+					data: {},
+					originalError: null
+				})
+			};
+		}
+		if (browser) {
+			await goto('/login');
+			throw {
 				type: ErrorType.UNAUTHORIZED,
 				status: -1,
 				message: 'Unauthorized, token has expired.',
 				data: {},
 				originalError: null
-			});
-		}
-		if (browser) {
-			throw await goto('/login');
+			};
 		} else {
 			throw redirect(303, '/login');
 		}
@@ -187,7 +201,7 @@ export async function callService<
 	try {
 		return {
 			success: true,
-			serviceCallResult: await serviceCall()
+			data: await serviceCall()
 		};
 	} catch (e) {
 		//TODO: error handling, what if server returns an array of errors for one field! :( // TODO: simulate this
@@ -202,23 +216,31 @@ export async function callService<
 			};
 
 			if (errorCallback) {
-				return await errorCallback(error);
+				return {
+					success: false,
+					error: await errorCallback(error)
+				};
 			}
 			throw error;
 		}
 
 		if (e.status === 401) {
+			error = {
+				type: ErrorType.UNAUTHORIZED,
+				status: e.status,
+				message: e.message,
+				data: e.body,
+				originalError: e
+			};
 			if (errorCallback) {
-				return await errorCallback({
-					type: ErrorType.UNAUTHORIZED,
-					status: e.status,
-					message: e.message,
-					data: e.body,
-					originalError: e
-				});
+				return {
+					success: false,
+					error: await errorCallback(error)
+				};
 			}
 			if (browser) {
-				throw await goto('/login');
+				await goto('/login');
+				throw error;
 			} else {
 				throw redirect(303, '/login');
 			}
@@ -233,7 +255,10 @@ export async function callService<
 				originalError: e
 			};
 			if (errorCallback) {
-				return await errorCallback(error);
+				return {
+					success: false,
+					error: await errorCallback(error)
+				};
 			}
 			throw error;
 		}
@@ -246,7 +271,10 @@ export async function callService<
 			originalError: e
 		};
 		if (errorCallback) {
-			return await errorCallback(error);
+			return {
+				success: false,
+				error: await errorCallback(error)
+			};
 		}
 		throw error;
 	}

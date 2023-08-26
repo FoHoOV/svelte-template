@@ -13,8 +13,10 @@ export async function applyAction<
 	TSchema extends OptionalSchemaType<TZodRawShape>
 >(e: ServiceError<TZodRawShape, TSchema>) {
 	switch (e.type) {
-		case (ErrorType.API_ERROR, ErrorType.VALIDATION_ERROR):
-			return fail(e.status, { message: e.message, data: e });
+		case ErrorType.API_ERROR:
+			break;
+		case ErrorType.VALIDATION_ERROR:
+			return fail(e.status, { message: e.message, data: e.data });
 		case ErrorType.UNAUTHORIZED:
 			throw redirect(303, '/login');
 		default:
@@ -33,15 +35,21 @@ export async function callServiceInFormActions<
 	errorSchema,
 	errorCallback
 }: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TZodRawShape, TSchema>) {
-	return await callService({
+	const result = await callService({
 		serviceCall: serviceCall,
 		isTokenRequired: isTokenRequired,
 		errorSchema: errorSchema,
 		errorCallback: async (e) => {
 			if (errorCallback) {
-				 return await errorCallback(e);
+				return await errorCallback(e);
 			}
 			return await applyAction(e);
 		}
 	});
+
+	if (result.success) {
+		return result.data;
+	} else {
+		return result.error;
+	}
 }

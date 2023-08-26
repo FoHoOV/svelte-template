@@ -22,7 +22,12 @@
 				return await TodoService.getForUser();
 			}
 		});
-		todos.setTodos(fetchedTodos);
+		if(fetchedTodos.success){
+			todos.setTodos(fetchedTodos.data);
+		}else {
+			createTodoFormErrors!.message = "";
+		}
+;
 	}
 </script>
 
@@ -35,7 +40,7 @@
 <form
 	use:superEnhance={{ validator: { schema }, form: form }}
 	on:submitclienterror={(e) => {
-		createTodoFormErrors ={...form, ...e.detail };
+		createTodoFormErrors = { ...form, ...e.detail };
 	}}
 	on:submitstarted={() => {
 		isCreateTodosSubmitting = true;
