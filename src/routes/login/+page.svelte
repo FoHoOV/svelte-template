@@ -7,6 +7,7 @@
 	import { schema } from './validators';
 
 	export let form: ActionData;
+	type z = NonNullable<typeof form>['data'];
 	let isFormSubmitting: boolean = false;
 	$: validationErrors = form;
 </script>
@@ -19,7 +20,10 @@
 	method="post"
 	use:superEnhance={{ validator: { schema } }}
 	on:submitclienterror={(e) => {
-		validationErrors = { ...form, ...e.detail };
+		validationErrors = {
+			...form,
+			...{ data: e.detail, message: 'Invalid form, please review your inputs' }
+		};
 	}}
 	on:submitstarted={() => {
 		isFormSubmitting = true;
@@ -32,12 +36,12 @@
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
 		<Error message={validationErrors?.message} />
 
-		<FormInput name="username" className="w-full" errors={validationErrors?.username} />
+		<FormInput name="username" className="w-full" errors={validationErrors?.data?.username} />
 		<FormInput
 			name="password"
 			className="w-full"
 			type="password"
-			errors={validationErrors?.password}
+			errors={validationErrors?.data?.password}
 		/>
 		<div class="card-actions justify-start w-full">
 			<LoadingButton

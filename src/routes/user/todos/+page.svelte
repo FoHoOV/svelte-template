@@ -20,14 +20,17 @@
 		const fetchedTodos = await callServiceInClient({
 			serviceCall: async () => {
 				return await TodoService.getForUser();
+			},
+			errorCallback: async (e) => {
+				// TODO: since we return the result in {success ...} format we should never through the error
+				return e;
 			}
 		});
-		if(fetchedTodos.success){
+		if (fetchedTodos.success) {
 			todos.setTodos(fetchedTodos.data);
-		}else {
-			createTodoFormErrors!.message = "";
+		} else {
+			createTodoFormErrors!.message = fetchedTodos.error.message;
 		}
-;
 	}
 </script>
 
@@ -40,7 +43,10 @@
 <form
 	use:superEnhance={{ validator: { schema }, form: form }}
 	on:submitclienterror={(e) => {
-		createTodoFormErrors = { ...form, ...e.detail };
+		createTodoFormErrors = {
+			...form,
+			...{ data: e.detail, message: 'Invalid form, please review your inputs' }
+		};
 	}}
 	on:submitstarted={() => {
 		isCreateTodosSubmitting = true;
@@ -62,13 +68,13 @@
 			name="title"
 			className="w-full"
 			hideLabel={true}
-			errors={createTodoFormErrors?.title}
+			errors={createTodoFormErrors?.data?.title}
 		/>
 		<FormInput
 			name="description"
 			className="w-full"
 			hideLabel={true}
-			errors={createTodoFormErrors?.description}
+			errors={createTodoFormErrors?.data?.description}
 		/>
 		<div class="card-actions justify-end w-full">
 			<LoadingButton

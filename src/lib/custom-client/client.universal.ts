@@ -6,6 +6,7 @@ import { ApiError, OpenAPI } from '../client';
 import { decodeJwt, type JWTPayload } from 'jose';
 import type { ApiRequestOptions } from '../client/core/ApiRequestOptions';
 import type { z } from 'zod';
+import type { ErrorMessage } from '$lib/utils/types';
 
 export const createRequest = (url: string, token?: string): Request => {
 	const request = new Request(url);
@@ -118,23 +119,23 @@ export enum ErrorType {
 export type ServiceError<TSchema extends z.AnyZodObject> =
 	| {
 			type: ErrorType.VALIDATION_ERROR;
-			message: string;
+			message: ErrorMessage;
 			status: number;
-			data: z.infer<NonNullable<TSchema>>; // TODO: we should error if TSchema is undefined here
+			data: z.infer<TSchema>; // TODO: we should error if TSchema is undefined here
 			originalError: ApiError;
 	  }
 	| {
 			type: ErrorType.API_ERROR;
-			message: string;
+			message: ErrorMessage;
 			status: number;
-			data: any;
+			data: unknown;
 			originalError: ApiError;
 	  }
 	| {
 			type: ErrorType.UNKNOWN_ERROR | ErrorType.UNAUTHORIZED;
-			message: string;
+			message: ErrorMessage;
 			status: number;
-			data: any;
+			data: unknown;
 			originalError: unknown;
 	  };
 
@@ -164,33 +165,32 @@ export async function callService<
 	| { success: true; data: Awaited<TPromiseReturn> }
 	| { success: false; error: Awaited<TErrorCallbackPromiseReturn> }
 > {
+	let error: ServiceError<TSchema>;
+
 	if (isTokenRequired && !(await isTokenExpirationDateValidAsync(OpenAPI.TOKEN))) {
 		OpenAPI.TOKEN = undefined;
+
+		error = {
+			type: ErrorType.UNAUTHORIZED,
+			status: -1,
+			message: 'Unauthorized, token has expired.',
+			data: {},
+			originalError: null
+		};
 
 		if (errorCallback) {
 			return {
 				success: false,
-				error: await errorCallback({
-					type: ErrorType.UNAUTHORIZED,
-					status: -1,
-					message: 'Unauthorized, token has expired.',
-					data: {},
-					originalError: null
-				})
+				error: await errorCallback(error)
 			};
 		}
 		if (browser) {
 			await goto('/login');
-			throw {
-				type: ErrorType.UNAUTHORIZED,
-				status: -1,
-				message: 'Unauthorized, token has expired.',
-				data: {},
-				originalError: null
-			};
+			throw error;
 		} else {
 			throw redirect(303, '/login');
 		}
+
 	}
 	try {
 		return {
@@ -199,12 +199,11 @@ export async function callService<
 		};
 	} catch (e) {
 		//TODO: error handling, what if server returns an array of errors for one field! :( // TODO: simulate this
-		let error: ServiceError<TSchema>;
 		if (!(e instanceof ApiError)) {
 			error = {
 				type: ErrorType.UNKNOWN_ERROR,
 				status: -1,
-				message: 'some errors has occurred',
+				message: 'An unknown error has occurred, please try again',
 				data: e,
 				originalError: e
 			};

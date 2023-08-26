@@ -19,7 +19,10 @@
 	method="post"
 	use:superEnhance={{ validator: { schema } }}
 	on:submitclienterror={(e) => {
-		validationErrors = { ...form, ...e.detail };
+				validationErrors = {
+			...form,
+			...{ data: e.detail, message: 'Invalid form, please review your inputs' }
+		};
 	}}
 	on:submitstarted={() => (isFormSubmitting = true)}
 	on:submitended={() => (isFormSubmitting = false)}
@@ -27,19 +30,19 @@
 >
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
 		<Error message={validationErrors?.message} />
-		<FormInput name="username" className="w-full" errors={validationErrors?.username} />
+		<FormInput name="username" className="w-full" errors={validationErrors?.data?.username} />
 		<FormInput
 			name="password"
 			className="w-full"
 			type="password"
-			errors={validationErrors?.password}
+			errors={validationErrors?.data?.password}
 		/>
 		<FormInput
 			name="confirm_password"
 			label="confirm password"
 			className="w-full"
 			type="password"
-			errors={validationErrors?.confirm_password}
+			errors={validationErrors?.data?.confirm_password}
 		/>
 		<div class="card-actions justify-start w-full">
 			<LoadingButton

@@ -3,3 +3,4 @@ export * from './enhance';
 export * from './client';
 export * from './constants';
 export * from './custom-client';
+export * from "./utils"
