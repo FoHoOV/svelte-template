@@ -14,9 +14,9 @@ export async function applyAction<
 >(e: ServiceError<TZodRawShape, TSchema>) {
 	switch (e.type) {
 		case ErrorType.API_ERROR:
-			break;
-		case ErrorType.VALIDATION_ERROR:
 			return fail(e.status, { message: e.message, data: e.data });
+		case ErrorType.VALIDATION_ERROR:
+			return fail(e.status, e.data);
 		case ErrorType.UNAUTHORIZED:
 			throw redirect(303, '/login');
 		default:
