@@ -1,17 +1,13 @@
-import type { ZodRawShape } from 'zod';
+import type { z } from 'zod';
 import { fail, redirect } from '@sveltejs/kit';
 import {
 	callService,
 	ErrorType,
-	type OptionalSchemaType,
 	type ServiceCallOptions,
 	type ServiceError
 } from './client.universal';
 
-export async function applyAction<
-	TZodRawShape extends ZodRawShape | undefined,
-	TSchema extends OptionalSchemaType<TZodRawShape>
->(e: ServiceError<TZodRawShape, TSchema>) {
+export async function applyAction<TSchema extends z.AnyZodObject>(e: ServiceError<TSchema>) {
 	switch (e.type) {
 		case ErrorType.API_ERROR:
 			return fail(e.status, { message: e.message, data: e.data });
@@ -27,14 +23,13 @@ export async function applyAction<
 export async function callServiceInFormActions<
 	TPromiseReturn,
 	TErrorCallbackPromiseReturn,
-	TZodRawShape extends ZodRawShape | undefined,
-	TSchema extends OptionalSchemaType<TZodRawShape>
+	TSchema extends z.AnyZodObject
 >({
 	serviceCall,
 	isTokenRequired = true,
 	errorSchema,
 	errorCallback
-}: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TZodRawShape, TSchema>) {
+}: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TSchema>) {
 	const result = await callService({
 		serviceCall: serviceCall,
 		isTokenRequired: isTokenRequired,

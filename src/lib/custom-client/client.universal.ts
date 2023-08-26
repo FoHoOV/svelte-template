@@ -1,11 +1,11 @@
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 import { PUBLIC_API_URL } from '$env/static/public';
-import { Redirect_1, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import { ApiError, OpenAPI } from '../client';
 import { decodeJwt, type JWTPayload } from 'jose';
 import type { ApiRequestOptions } from '../client/core/ApiRequestOptions';
-import type { AnyZodObject, ZodObject, ZodRawShape, ZodType, z } from 'zod';
+import type { z } from 'zod';
 
 export const createRequest = (url: string, token?: string): Request => {
 	const request = new Request(url);
@@ -114,12 +114,8 @@ export enum ErrorType {
 	UNKNOWN_ERROR,
 	UNAUTHORIZED
 }
-export type OptionalSchemaType<T> = T extends ZodRawShape ? ZodObject<T> : undefined;
 
-export type ServiceError<
-	TZodRawShape extends ZodRawShape | undefined,
-	TSchema extends OptionalSchemaType<TZodRawShape>
-> =
+export type ServiceError<TSchema extends z.AnyZodObject> =
 	| {
 			type: ErrorType.VALIDATION_ERROR;
 			message: string;
@@ -145,13 +141,12 @@ export type ServiceError<
 export type ServiceCallOptions<
 	TPromiseReturn,
 	TErrorCallbackReturn,
-	TZodRawShape extends ZodRawShape | undefined,
-	TSchema extends OptionalSchemaType<TZodRawShape>
+	TSchema extends z.AnyZodObject
 > = {
 	serviceCall: () => Promise<TPromiseReturn>;
 	errorSchema?: TSchema;
 	isTokenRequired?: boolean;
-	errorCallback?: (e: ServiceError<TZodRawShape, TSchema>) => Promise<TErrorCallbackReturn>;
+	errorCallback?: (e: ServiceError<TSchema>) => Promise<TErrorCallbackReturn>;
 };
 
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
@@ -159,14 +154,13 @@ type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 export async function callService<
 	TPromiseReturn,
 	TErrorCallbackPromiseReturn,
-	TZodRawShape extends ZodRawShape | undefined,
-	TSchema extends OptionalSchemaType<TZodRawShape>
+	TSchema extends z.AnyZodObject
 >({
 	serviceCall,
 	isTokenRequired = true,
 	errorSchema,
 	errorCallback
-}: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TZodRawShape, TSchema>): Promise<
+}: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TSchema>): Promise<
 	| { success: true; data: Awaited<TPromiseReturn> }
 	| { success: false; error: Awaited<TErrorCallbackPromiseReturn> }
 > {
@@ -205,7 +199,7 @@ export async function callService<
 		};
 	} catch (e) {
 		//TODO: error handling, what if server returns an array of errors for one field! :( // TODO: simulate this
-		let error: ServiceError<TZodRawShape, TSchema>;
+		let error: ServiceError<TSchema>;
 		if (!(e instanceof ApiError)) {
 			error = {
 				type: ErrorType.UNKNOWN_ERROR,
