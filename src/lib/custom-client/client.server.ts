@@ -13,12 +13,12 @@ export async function applyAction<TSchema extends z.AnyZodObject>(e: ServiceErro
 		// case ErrorType.API_ERROR:
 		// 	return superFail(404, {
 		// 		message: e.message,
-		// 		data: e.data as unknown
+		// 		data: e.data as unknown // TODO: enable this
 		// 	});
 		case ErrorType.VALIDATION_ERROR:
 			return superFail(400, { message: e.message, data: e.data });
-		// case ErrorType.UNAUTHORIZED:
-		// 	throw redirect(303, '/login');
+		case ErrorType.UNAUTHORIZED:
+			throw redirect(303, '/login');
 		default:
 			throw e.originalError;
 	}
@@ -32,7 +32,7 @@ export async function callServiceInFormActions<
 	serviceCall,
 	isTokenRequired = true,
 	errorSchema,
-	errorCallback
+	errorCallback = undefined
 }: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TSchema>) {
 	const result = await callService({
 		serviceCall: serviceCall,

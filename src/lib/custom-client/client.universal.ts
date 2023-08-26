@@ -160,7 +160,7 @@ export async function callService<
 	serviceCall,
 	isTokenRequired = true,
 	errorSchema,
-	errorCallback
+	errorCallback = undefined
 }: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TSchema>): Promise<
 	| { success: true; data: Awaited<TPromiseReturn> }
 	| { success: false; error: Awaited<TErrorCallbackPromiseReturn> }
