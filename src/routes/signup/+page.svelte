@@ -21,7 +21,8 @@
 	on:submitclienterror={(e) => {
 		validationErrors = {
 			...form,
-			...{ data: e.detail, message: 'Invalid form, please review your inputs' }
+			...e.detail,
+			message: 'Invalid form, please review your inputs'
 		};
 	}}
 	on:submitstarted={() => (isFormSubmitting = true)}
@@ -30,19 +31,19 @@
 >
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
 		<Error message={validationErrors?.message} />
-		<FormInput name="username" className="w-full" errors={validationErrors?.data?.username} />
+		<FormInput name="username" className="w-full" errors={validationErrors?.username} />
 		<FormInput
 			name="password"
 			className="w-full"
 			type="password"
-			errors={validationErrors?.data?.password}
+			errors={validationErrors?.password}
 		/>
 		<FormInput
 			name="confirm_password"
 			label="confirm password"
 			className="w-full"
 			type="password"
-			errors={validationErrors?.data?.confirm_password}
+			errors={validationErrors?.confirm_password}
 		/>
 		<div class="card-actions justify-start w-full">
 			<LoadingButton

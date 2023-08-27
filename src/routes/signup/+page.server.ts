@@ -22,7 +22,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const result = await callServiceInFormActions({
+		return await callServiceInFormActions({
 			serviceCall: async () => {
 				await UserService.signup(validationsResult.data);
 				throw redirect(303, '/login');
@@ -30,11 +30,5 @@ export const actions: Actions = {
 			isTokenRequired: false,
 			errorSchema: UserCreate
 		});
-
-		if (result.success) {
-			return result.result;
-		} else {
-			return result.error;
-		}
 	}
 } satisfies Actions;

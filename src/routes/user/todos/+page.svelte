@@ -41,7 +41,8 @@
 	on:submitclienterror={(e) => {
 		createTodoFormErrors = {
 			...form,
-			...{ data: e.detail, message: 'Invalid form, please review your inputs' }
+			...e.detail,
+			message: 'Invalid form, please review your inputs'
 		};
 	}}
 	on:submitstarted={() => {
@@ -51,7 +52,7 @@
 		isCreateTodosSubmitting = false;
 	}}
 	on:submitsucceeded={(e) => {
-		e.detail.response.success && todos.addTodo(e.detail.response.result);
+		todos.addTodo(e.detail.response.result);
 	}}
 	bind:this={formElement}
 	method="post"
@@ -64,13 +65,13 @@
 			name="title"
 			className="w-full"
 			hideLabel={true}
-			errors={createTodoFormErrors?.data?.title}
+			errors={createTodoFormErrors?.title}
 		/>
 		<FormInput
 			name="description"
 			className="w-full"
 			hideLabel={true}
-			errors={createTodoFormErrors?.data?.description}
+			errors={createTodoFormErrors?.description}
 		/>
 		<div class="card-actions justify-end w-full">
 			<LoadingButton

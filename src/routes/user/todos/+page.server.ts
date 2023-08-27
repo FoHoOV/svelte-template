@@ -22,7 +22,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const result = await callServiceInFormActions({
+		return await callServiceInFormActions({
 			serviceCall: async () => {
 				return await TodoService.createForUser({
 					...validationsResult.data
@@ -30,11 +30,5 @@ export const actions: Actions = {
 			},
 			errorSchema: TodoCreate
 		});
-
-		if (result.success) {
-			return result.result;
-		} else {
-			return result.error;
-		}
 	}
 } satisfies Actions;

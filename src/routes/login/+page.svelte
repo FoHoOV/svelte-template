@@ -7,7 +7,6 @@
 	import { schema } from './validators';
 
 	export let form: ActionData;
-	type z = NonNullable<typeof form>['data'];
 	let isFormSubmitting: boolean = false;
 	$: validationErrors = form;
 </script>
@@ -22,7 +21,8 @@
 	on:submitclienterror={(e) => {
 		validationErrors = {
 			...form,
-			...{ data: e.detail, message: 'Invalid form, please review your inputs' }
+			...e.detail,
+			message: 'Invalid form, please review your inputs'
 		};
 	}}
 	on:submitstarted={() => {
@@ -36,12 +36,12 @@
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
 		<Error message={validationErrors?.message} />
 
-		<FormInput name="username" className="w-full" errors={validationErrors?.data?.username} />
+		<FormInput name="username" className="w-full" errors={validationErrors?.username} />
 		<FormInput
 			name="password"
 			className="w-full"
 			type="password"
-			errors={validationErrors?.data?.password}
+			errors={validationErrors?.password}
 		/>
 		<div class="card-actions justify-start w-full">
 			<LoadingButton
