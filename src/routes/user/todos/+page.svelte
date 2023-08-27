@@ -20,10 +20,6 @@
 		const fetchedTodos = await callServiceInClient({
 			serviceCall: async () => {
 				return await TodoService.getForUser();
-			},
-			errorCallback: async (e) => {
-				// TODO: since we return the result in {success ...} format we should never through the error
-				return e;
 			}
 		});
 		if (fetchedTodos.success) {

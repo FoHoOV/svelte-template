@@ -187,8 +187,13 @@ export async function callService<
 	errorSchema,
 	errorCallback = undefined
 }: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TSchema>): Promise<
-	| { success: false; result: undefined; error: Awaited<TErrorCallbackPromiseReturn> }
-	| { success: false; result: undefined; error: ServiceError<TSchema> }
+	| {
+			success: false;
+			result: undefined;
+			error: TErrorCallbackPromiseReturn extends unknown
+				? ServiceError<TSchema>
+				: Awaited<TErrorCallbackPromiseReturn>;
+	  }
 	| { success: true; result: Awaited<TPromiseReturn>; error: undefined }
 > {
 	let error: ServiceError<TSchema>;
@@ -200,7 +205,7 @@ export async function callService<
 			message: 'Unauthorized, token has expired.',
 			data: {},
 			originalError: null
-		});
+		}) as any;
 	}
 	try {
 		return {
@@ -223,10 +228,10 @@ export async function callService<
 				return {
 					success: false,
 					result: undefined,
-					error: await errorCallback(error)
+					error: (await errorCallback(error)) as any
 				};
 			}
-			return { success: false, result: undefined, error: error };
+			return { success: false, result: undefined, error: error as any };
 		}
 
 		if (e.status === 401) {
@@ -236,7 +241,7 @@ export async function callService<
 				message: e.message,
 				data: e.body,
 				originalError: e
-			});
+			}) as any;
 		}
 		const parsedApiError = await errorSchema?.strip().partial().safeParseAsync(e.body.detail);
 		if (parsedApiError?.success) {
@@ -251,10 +256,10 @@ export async function callService<
 				return {
 					success: false,
 					result: undefined,
-					error: await errorCallback(error)
+					error: (await errorCallback(error)) as any
 				};
 			}
-			return { success: false, result: undefined, error: error };
+			return { success: false, result: undefined, error: error as any };
 		}
 
 		error = {
@@ -268,9 +273,9 @@ export async function callService<
 			return {
 				success: false,
 				result: undefined,
-				error: await errorCallback(error)
+				error: (await errorCallback(error)) as any
 			};
 		}
-		return { success: false, result: undefined, error: error };
+		return { success: false, result: undefined, error: error as any };
 	}
 }
