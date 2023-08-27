@@ -27,7 +27,7 @@
 			}
 		});
 		if (fetchedTodos.success) {
-			todos.setTodos(fetchedTodos.data);
+			todos.setTodos(fetchedTodos.result);
 		} else {
 			createTodoFormErrors!.message = fetchedTodos.error.message;
 		}
