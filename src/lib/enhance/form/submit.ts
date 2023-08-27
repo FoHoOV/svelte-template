@@ -14,7 +14,7 @@ export type SubmitEvents<TSchema extends ZodType, TActionData = unknown> = {
 	'on:submitstarted'?: (e: CustomEvent<void>) => void;
 	'on:submitended'?: (e: CustomEvent<void>) => void;
 	'on:submitsucceeded'?: (
-		e: CustomEvent<{ result: NonNullable<TActionData>; formData: z.infer<TSchema> }>
+		e: CustomEvent<{ response: NonNullable<TActionData>; formData: z.infer<TSchema> }>
 	) => void;
 };
 
@@ -46,7 +46,7 @@ export function superEnhance<TSchema extends ZodType, TActionData = unknown>(
 					node.dispatchEvent(
 						new CustomEvent('submitsucceeded', {
 							detail: {
-								result: result.data,
+								response: result.data,
 								formData: Object.fromEntries(formData)
 							}
 						})
