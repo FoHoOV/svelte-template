@@ -10,11 +10,11 @@ import { superFail } from '$lib/enhance';
 
 export async function applyAction<TSchema extends z.AnyZodObject>(e: ServiceError<TSchema>) {
 	switch (e.type) {
-		// case ErrorType.API_ERROR:
-		// 	return superFail(404, {
-		// 		message: e.message,
-		// 		data: e.data as unknown // TODO: enable this
-		// 	});
+		case ErrorType.API_ERROR:
+			return superFail(404, {
+				message: e.message,
+				data: e.data as unknown // TODO: enable this
+			});
 		case ErrorType.VALIDATION_ERROR:
 			return superFail(400, { message: e.message, data: e.data });
 		case ErrorType.UNAUTHORIZED:
@@ -45,10 +45,10 @@ export async function callServiceInFormActions<
 			return await applyAction(e);
 		}
 	});
-
-	if (result.success) {
-		return result.data;
-	} else {
-		return result.error;
-	}
+	return result;
+	// if (result.success) {
+	// 	return result.data;
+	// } else {
+	// 	return result.error;
+	// }
 }

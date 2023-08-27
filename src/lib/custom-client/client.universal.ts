@@ -162,8 +162,8 @@ export async function callService<
 	errorSchema,
 	errorCallback = undefined
 }: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TSchema>): Promise<
-	| { success: true; data: Awaited<TPromiseReturn> }
-	| { success: false; error: Awaited<TErrorCallbackPromiseReturn> }
+	| { success: false; data?: never; error: Awaited<TErrorCallbackPromiseReturn> }
+	| { success: true; data: Awaited<TPromiseReturn>; error?: never }
 > {
 	let error: ServiceError<TSchema>;
 
@@ -190,7 +190,6 @@ export async function callService<
 		} else {
 			throw redirect(303, '/login');
 		}
-
 	}
 	try {
 		return {
@@ -269,6 +268,6 @@ export async function callService<
 				error: await errorCallback(error)
 			};
 		}
-		throw error;
+		throw e;
 	}
 }
