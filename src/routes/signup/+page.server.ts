@@ -1,4 +1,4 @@
-import { fail, type Actions, redirect } from '@sveltejs/kit';
+import { redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { UserService } from '$lib/client';
 import { convertFormDataToObject, superFail } from '$lib/enhance/form';

@@ -1,4 +1,4 @@
-import { ActionFailure, fail } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import type { NumberRange, ErrorMessage } from '$lib/utils/types';
 
 export function convertFormDataToObject(formData: FormData): Record<string, FormDataEntryValue> {
