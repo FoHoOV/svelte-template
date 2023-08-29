@@ -51,7 +51,7 @@
 		isCreateTodosSubmitting = false;
 	}}
 	on:submitsucceeded={(e) => {
-		todos.addTodo(e.detail.response.result);
+		todos.addTodo(e.detail.response);
 	}}
 	bind:this={formElement}
 	method="post"
