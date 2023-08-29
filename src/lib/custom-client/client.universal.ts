@@ -187,25 +187,29 @@ export async function callService<
 	errorSchema,
 	errorCallback = undefined
 }: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TSchema>): Promise<
-	| {
-			success: false;
-			result: undefined;
-			error: TErrorCallbackPromiseReturn extends unknown
-				? ServiceError<TSchema>
-				: Awaited<TErrorCallbackPromiseReturn>;
-	  }
+	| (TErrorCallbackPromiseReturn extends unknown
+			? {
+					success: false;
+					result: undefined;
+					error: ServiceError<TSchema>;
+			  }
+			: {
+					success: false;
+					result: undefined;
+					error: Awaited<TErrorCallbackPromiseReturn>;
+			  })
 	| { success: true; result: Awaited<TPromiseReturn>; error: undefined }
 > {
 	let error: ServiceError<TSchema>;
 
 	if (isTokenRequired && !(await isTokenExpirationDateValidAsync(OpenAPI.TOKEN))) {
-		return await _handleUnauthenticatedUser(errorCallback, {
+		return (await _handleUnauthenticatedUser(errorCallback, {
 			type: ErrorType.UNAUTHORIZED,
 			status: -1,
 			message: 'Unauthorized, token has expired.',
 			data: {},
 			originalError: null
-		}) as any;
+		})) as any;
 	}
 	try {
 		return {
@@ -235,13 +239,13 @@ export async function callService<
 		}
 
 		if (e.status === 401) {
-			return await _handleUnauthenticatedUser(errorCallback, {
+			return (await _handleUnauthenticatedUser(errorCallback, {
 				type: ErrorType.UNAUTHORIZED,
 				status: e.status,
 				message: e.message,
 				data: e.body,
 				originalError: e
-			}) as any;
+			})) as any;
 		}
 		const parsedApiError = await errorSchema?.strip().partial().safeParseAsync(e.body.detail);
 		if (parsedApiError?.success) {

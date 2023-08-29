@@ -34,7 +34,7 @@ export async function callServiceInFormActions<
 	errorSchema,
 	errorCallback = undefined
 }: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TSchema>) {
-	return await callService({
+	const result =  await callService({
 		serviceCall: serviceCall,
 		isTokenRequired: isTokenRequired,
 		errorSchema: errorSchema,
@@ -45,4 +45,7 @@ export async function callServiceInFormActions<
 			return await applyAction(e);
 		}
 	});
+	// overload for universal load required? why doesn't the conditional type work?
+	// create a new fail function btw, fuck the built-in
+	if(!result.success && result.error.type) {}
 }
