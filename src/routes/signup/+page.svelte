@@ -3,12 +3,12 @@
 	import FormInput from '$lib/components/forms/FormInput.svelte';
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import Error from '$components/Error.svelte';
-	import { superEnhance } from '$lib/enhance/form';
+	import { superEnhance, getFormErrors } from '$lib/enhance/form';
 	import { schema } from './validators';
 
 	export let form: ActionData;
 	let isFormSubmitting: boolean = false;
-	$: validationErrors = form;
+	$: validationErrors = getFormErrors(form);
 </script>
 
 <svelte:head>
@@ -20,8 +20,7 @@
 	use:superEnhance={{ validator: { schema } }}
 	on:submitclienterror={(e) => {
 		validationErrors = {
-			...form,
-			...e.detail,
+			errors: e.detail,
 			message: 'Invalid form, please review your inputs'
 		};
 	}}
@@ -31,19 +30,19 @@
 >
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
 		<Error message={validationErrors?.message} />
-		<FormInput name="username" className="w-full" errors={validationErrors?.username} />
+		<FormInput name="username" className="w-full" errors={validationErrors?.errors?.username} />
 		<FormInput
 			name="password"
 			className="w-full"
 			type="password"
-			errors={validationErrors?.password}
+			errors={validationErrors?.errors?.password}
 		/>
 		<FormInput
 			name="confirm_password"
 			label="confirm password"
 			className="w-full"
 			type="password"
-			errors={validationErrors?.confirm_password}
+			errors={validationErrors?.errors?.confirm_password}
 		/>
 		<div class="card-actions justify-start w-full">
 			<LoadingButton

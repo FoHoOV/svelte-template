@@ -3,7 +3,7 @@
 	import LoadingButton from '$lib/components/buttons/LoadingButton.svelte';
 	import TodoList from '$lib/components/todo/TodoList.svelte';
 	import Error from '$components/Error.svelte';
-	import { superEnhance } from '$lib/enhance/form';
+	import { getFormErrors, superEnhance } from '$lib/enhance/form';
 	import type { ActionData } from './$types';
 	import { TodoService, type Todo } from '$lib/client';
 	import todos from '$lib/stores/todos';
@@ -13,7 +13,7 @@
 
 	export let form: ActionData;
 	export let formElement: HTMLFormElement;
-	$: createTodoFormErrors = form;
+	$: createTodoFormErrors = getFormErrors(form);
 	let isCreateTodosSubmitting = false;
 
 	async function fetchTodos() {
@@ -40,8 +40,7 @@
 	use:superEnhance={{ validator: { schema }, form: form }}
 	on:submitclienterror={(e) => {
 		createTodoFormErrors = {
-			...form,
-			...e.detail,
+			errors: e.detail,
 			message: 'Invalid form, please review your inputs'
 		};
 	}}
@@ -65,13 +64,13 @@
 			name="title"
 			className="w-full"
 			hideLabel={true}
-			errors={createTodoFormErrors?.title}
+			errors={createTodoFormErrors?.errors?.title}
 		/>
 		<FormInput
 			name="description"
 			className="w-full"
 			hideLabel={true}
-			errors={createTodoFormErrors?.description}
+			errors={createTodoFormErrors?.errors?.description}
 		/>
 		<div class="card-actions justify-end w-full">
 			<LoadingButton
@@ -86,7 +85,7 @@
 				type="button"
 				on:click={() => {
 					formElement.reset();
-					createTodoFormErrors = null;
+					createTodoFormErrors = {errors: undefined, message: undefined};
 				}}
 			/>
 		</div>
