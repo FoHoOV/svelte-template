@@ -1,8 +1,5 @@
 <script lang="ts">
-	import {
-		faCheckCircle,
-		faCircle
-	} from '@fortawesome/free-solid-svg-icons';
+	import { faCheckCircle, faCircle, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 	import todos from '$lib/stores/todos';
 	import type { Todo } from '$lib/client/models/Todo';
 	import { TodoService } from '$lib/client';
@@ -11,19 +8,34 @@
 	import { callServiceInClient } from '$lib/custom-client/client.client';
 
 	export let todo: Todo;
-	let isChangingDoneStatus: boolean = false;
+	let isCallingService: boolean = false;
 	let apiErrorTitle: string | null;
 
 	async function handleChangeDoneStatus() {
-		isChangingDoneStatus = true;
+		isCallingService = true;
 		await callServiceInClient({
 			serviceCall: async () => {
-				await TodoService.makeCompleted(todo);
+				await TodoService.update({ ...todo, is_done: !todo.is_done });
 				todos.updateTodo(todo, !todo.is_done);
-				isChangingDoneStatus = false;
+				isCallingService = false;
 			},
 			errorCallback: async (e) => {
-				isChangingDoneStatus = true;
+				isCallingService = false;
+				apiErrorTitle = e.message;
+			}
+		});
+	}
+
+	async function handleRemoveTodo() {
+		isCallingService = true;
+		await callServiceInClient({
+			serviceCall: async () => {
+				await TodoService.remove(todo);
+				todos.removeTodo(todo);
+				isCallingService = false;
+			},
+			errorCallback: async (e) => {
+				isCallingService = false;
 				apiErrorTitle = e.message;
 			}
 		});
@@ -32,7 +44,7 @@
 
 <div class="card-body">
 	<Error message={apiErrorTitle} />
-	{#if isChangingDoneStatus}
+	{#if isCallingService}
 		<div
 			class="absolute flex align-center justify-center top-0.5 left-0.5 w-full h-full z-10 bg-base-300 rounded-lg"
 		>
@@ -52,6 +64,9 @@
 				<Fa icon={faCircle} class="text-green-400" />
 			</button>
 		{/if}
+		<button on:click={handleRemoveTodo}>
+			<Fa icon={faTrashCan} class="text-red-400" />
+		</button>
 	</div>
 	<p>{todo.description}</p>
 </div>

@@ -252,7 +252,7 @@ export async function callService<
 			error: await errorCallback({
 				type: ErrorType.API_ERROR,
 				status: e.status,
-				message: e.message,
+				message: e.body.detail ?? e.message,
 				data: e.body,
 				originalError: e
 			})
