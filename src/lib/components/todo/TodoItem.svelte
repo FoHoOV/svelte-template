@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { faCheckCircle, faEarDeaf, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+	import { faCheckCircle, faCheckDouble, faCheckToSlot, faCircle, faEarDeaf, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 	import todos from '$lib/stores/todos';
 	import type { Todo } from '$lib/client/models/Todo';
 	import { ApiError, TodoService } from '$lib/client';
@@ -46,7 +46,7 @@
 			</button>
 		{:else}
 			<button on:click={handleChangeDoneStatus}>
-				<Fa icon={faEarDeaf} class="text-red-400" />
+				<Fa icon={faCircle} class="text-green-400" />
 			</button>
 		{/if}
 	</div>
