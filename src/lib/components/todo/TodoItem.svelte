@@ -1,31 +1,35 @@
 <script lang="ts">
-	import { faTrashCan } from '@fortawesome/free-solid-svg-icons';
+	import { faCheckCircle, faEarDeaf, faTrashCan } from '@fortawesome/free-solid-svg-icons';
 	import todos from '$lib/stores/todos';
 	import type { Todo } from '$lib/client/models/Todo';
 	import { ApiError, TodoService } from '$lib/client';
 	import Error from '$components/Error.svelte';
 	import Fa from 'svelte-fa/src/fa.svelte';
+	import { callServiceInClient } from '$lib/custom-client/client.client';
 
 	export let todo: Todo;
-	let isBeingDeleted: boolean = false;
+	let isChangingDoneStatus: boolean = false;
 	let apiErrorTitle: string | null;
-	async function handleRemove() {
-		isBeingDeleted = true;
-		try {
-			await TodoService.makeCompleted(todo);
-			todos.removeTodo(todo);
-			isBeingDeleted = false;
-		} catch (e) {
-			const apiError = <ApiError>e;
-			apiErrorTitle = apiError.message;
-			isBeingDeleted = false;
-		}
+
+	async function handleChangeDoneStatus() {
+		isChangingDoneStatus = true;
+		await callServiceInClient({
+			serviceCall: async () => {
+				await TodoService.makeCompleted(todo);
+				todos.updateTodo(todo, !todo.is_done);
+				isChangingDoneStatus = false;
+			},
+			errorCallback: async (e) => {
+				isChangingDoneStatus = true;
+				apiErrorTitle = e.message;
+			}
+		});
 	}
 </script>
 
 <div class="card-body">
 	<Error message={apiErrorTitle} />
-	{#if isBeingDeleted}
+	{#if isChangingDoneStatus}
 		<div
 			class="absolute flex align-center justify-center top-0.5 left-0.5 w-full h-full z-10 bg-base-300 rounded-lg"
 		>
@@ -36,9 +40,15 @@
 		<h1>
 			{todo.title}
 		</h1>
-		<button on:click={handleRemove}>
-			<Fa icon={faTrashCan} class="text-red-400" />
-		</button>
+		{#if todo.is_done}
+			<button on:click={handleChangeDoneStatus}>
+				<Fa icon={faCheckCircle} class="text-red-400" />
+			</button>
+		{:else}
+			<button on:click={handleChangeDoneStatus}>
+				<Fa icon={faEarDeaf} class="text-red-400" />
+			</button>
+		{/if}
 	</div>
 	<p>{todo.description}</p>
 </div>

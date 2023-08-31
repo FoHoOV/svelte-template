@@ -15,6 +15,18 @@ const removeTodo = (todo: Todo) => {
 	});
 };
 
+const updateTodo = (todo: Todo, isDone: boolean) => {
+	_update((todos) => {
+		return todos.map((value) => {
+			if(value.id !== todo.id) {
+				return value;
+			}
+			value.is_done = isDone;
+			return value;
+		});
+	});
+};
+
 const setTodos = (todos: Todo[]) => {
 	_set(todos);
 };
@@ -23,4 +35,4 @@ const clearTodos = () => {
 	_set([]);
 };
 
-export default { addTodo, setTodos, removeTodo, clearTodos, subscribe };
+export default { addTodo, setTodos, removeTodo, updateTodo, clearTodos, subscribe };

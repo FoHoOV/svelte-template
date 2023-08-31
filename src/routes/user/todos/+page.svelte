@@ -99,7 +99,14 @@
 	{#await fetchTodos()}
 		<span class="loading loading-ring m-auto block" />
 	{:then}
-		<TodoList />
+		<div class="grid grid-cols-2 center gap-2">
+			<div>
+				<TodoList todos={$todos} done={false} />
+			</div>
+			<div>
+				<TodoList todos={$todos} done={true} />
+			</div>
+		</div>
 	{:catch error}
 		<Error message={error.message} />
 	{/await}
