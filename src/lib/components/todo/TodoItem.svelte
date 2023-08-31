@@ -1,8 +1,11 @@
 <script lang="ts">
-	import { faCheckCircle, faCheckDouble, faCheckToSlot, faCircle, faEarDeaf, faTrashCan } from '@fortawesome/free-solid-svg-icons';
+	import {
+		faCheckCircle,
+		faCircle
+	} from '@fortawesome/free-solid-svg-icons';
 	import todos from '$lib/stores/todos';
 	import type { Todo } from '$lib/client/models/Todo';
-	import { ApiError, TodoService } from '$lib/client';
+	import { TodoService } from '$lib/client';
 	import Error from '$components/Error.svelte';
 	import Fa from 'svelte-fa/src/fa.svelte';
 	import { callServiceInClient } from '$lib/custom-client/client.client';
