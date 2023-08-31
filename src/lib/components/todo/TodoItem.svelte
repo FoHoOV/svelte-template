@@ -55,18 +55,20 @@
 		<h1>
 			{todo.title}
 		</h1>
-		{#if todo.is_done}
-			<button on:click={handleChangeDoneStatus}>
-				<Fa icon={faUndo} class="text-red-400" />
+		<div>
+			{#if todo.is_done}
+				<button on:click={handleChangeDoneStatus}>
+					<Fa icon={faUndo} class="text-red-400" />
+				</button>
+			{:else}
+				<button on:click={handleChangeDoneStatus}>
+					<Fa icon={faCheckCircle} class="text-green-400" />
+				</button>
+			{/if}
+			<button on:click={handleRemoveTodo}>
+				<Fa icon={faTrashCan} class="text-red-400" />
 			</button>
-		{:else}
-			<button on:click={handleChangeDoneStatus}>
-				<Fa icon={faCheckCircle} class="text-green-400" />
-			</button>
-		{/if}
-		<button on:click={handleRemoveTodo}>
-			<Fa icon={faTrashCan} class="text-red-400" />
-		</button>
+		</div>
 	</div>
 	<p>{todo.description}</p>
 </div>
