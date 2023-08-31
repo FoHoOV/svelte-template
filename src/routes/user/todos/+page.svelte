@@ -84,7 +84,7 @@
 				type="button"
 				on:click={() => {
 					formElement.reset();
-					createTodoFormErrors = {errors: undefined, message: undefined};
+					createTodoFormErrors = { errors: undefined, message: undefined };
 				}}
 			/>
 		</div>

@@ -25,14 +25,14 @@ export async function applyAction<TSchema extends z.AnyZodObject>(e: ServiceErro
 	}
 }
 
-
 export async function callServiceInFormActions<TPromiseReturn, TSchema extends z.AnyZodObject>({
 	serviceCall,
 	isTokenRequired = true,
 	errorSchema
-}: Omit<
-	ServiceCallOptions<TPromiseReturn, TSchema, Awaited<ReturnType<typeof applyAction<TSchema>>>>,
-	'errorCallback'
+}: ServiceCallOptions<
+	TPromiseReturn,
+	TSchema,
+	Awaited<ReturnType<typeof applyAction<TSchema>>>
 >): Promise<
 	| { success: true; result: Awaited<TPromiseReturn>; error: undefined }
 	| Awaited<ReturnType<typeof applyAction<TSchema>>>
@@ -55,7 +55,7 @@ export async function callServiceInFormActions<
 export async function callServiceInFormActions<
 	TPromiseReturn,
 	TSchema extends z.AnyZodObject,
-	TErrorCallbackReturn = never
+	TErrorCallbackReturn
 >({
 	serviceCall,
 	isTokenRequired = true,
