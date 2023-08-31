@@ -4,7 +4,7 @@ import { UserService } from '$lib/client';
 import { convertFormDataToObject, superFail } from '$lib/enhance/form';
 import { schema } from './validators';
 import { UserCreate } from '$lib/client/zod/schemas';
-import { callServiceInFormActions } from '$lib/custom-client';
+import { applyAction, callServiceInFormActions } from '$lib/custom-client';
 
 export const load = (async () => {
 	return {};
@@ -18,10 +18,10 @@ export const actions: Actions = {
 		if (!validationsResult.success) {
 			return superFail(400, {
 				message: 'Invalid form, please review your inputs',
-				data: validationsResult.error.flatten().fieldErrors
+				error: validationsResult.error.flatten().fieldErrors
 			});
 		}
-
+		
 		return await callServiceInFormActions({
 			serviceCall: async () => {
 				await UserService.signup(validationsResult.data);

@@ -89,28 +89,25 @@ export const postToExternal = async <TResponse, TError = unknown>(
 };
 
 const _handleUnauthenticatedUser = async <TSchema extends z.AnyZodObject, TPromise>(
-	errorCallback: ((error: ServiceError<TSchema>) => TPromise) | undefined,
+	errorCallback: (error: ServiceError<TSchema>) => TPromise,
 	error: ServiceError<TSchema>
-): Promise<
-	| { success: false; error: Awaited<TPromise>; result: undefined }
-	| { success: false; error: ServiceError<TSchema>; result: undefined }
-> => {
+): Promise<{ success: false; error: Awaited<TPromise>; result: undefined }> => {
 	OpenAPI.TOKEN = undefined;
 
-	if (errorCallback) {
-		return {
-			success: false,
-			result: undefined,
-			error: await errorCallback(error)
-		};
-	}
-	if (browser) {
-		await goto('/login');
-		return { success: false, result: undefined, error: error };
-	} else {
-		throw redirect(303, '/login');
-	}
+	return {
+		success: false,
+		result: undefined,
+		error: await errorCallback(error)
+	};
+	// if (browser) { // TODO:
+	// 	await goto('/login');
+	// 	return { success: false, result: undefined, error: error };
+	// } else {
+	// 	throw redirect(303, '/login');
+	// }
 };
+
+type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
 
 export async function isTokenExpirationDateValidAsync(
 	token: string | Resolver<string> | undefined
@@ -166,8 +163,8 @@ export type ServiceError<TSchema extends z.AnyZodObject> =
 
 export type ServiceCallOptions<
 	TPromiseReturn,
-	TErrorCallbackReturn,
-	TSchema extends z.AnyZodObject
+	TSchema extends z.AnyZodObject,
+	TErrorCallbackReturn
 > = {
 	serviceCall: () => Promise<TPromiseReturn>;
 	errorSchema?: TSchema;
@@ -175,41 +172,33 @@ export type ServiceCallOptions<
 	errorCallback?: (e: ServiceError<TSchema>) => Promise<TErrorCallbackReturn>;
 };
 
-type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
-
 export async function callService<
 	TPromiseReturn,
-	TErrorCallbackPromiseReturn,
-	TSchema extends z.AnyZodObject
+	TSchema extends z.AnyZodObject,
+	TErrorCallbackReturn = ServiceError<TSchema>
 >({
 	serviceCall,
 	isTokenRequired = true,
 	errorSchema,
-	errorCallback = undefined
-}: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TSchema>): Promise<
-	| (TErrorCallbackPromiseReturn extends unknown
-			? {
-					success: false;
-					result: undefined;
-					error: ServiceError<TSchema>;
-			  }
-			: {
-					success: false;
-					result: undefined;
-					error: Awaited<TErrorCallbackPromiseReturn>;
-			  })
+	errorCallback = async (e) => {
+		return e as any;
+	}
+}: ServiceCallOptions<TPromiseReturn, TSchema, TErrorCallbackReturn>): Promise<
+	| {
+			success: false;
+			result: undefined;
+			error: TErrorCallbackReturn;
+	  }
 	| { success: true; result: Awaited<TPromiseReturn>; error: undefined }
 > {
-	let error: ServiceError<TSchema>;
-
 	if (isTokenRequired && !(await isTokenExpirationDateValidAsync(OpenAPI.TOKEN))) {
-		return (await _handleUnauthenticatedUser(errorCallback, {
+		return await _handleUnauthenticatedUser(errorCallback, {
 			type: ErrorType.UNAUTHORIZED,
 			status: -1,
 			message: 'Unauthorized, token has expired.',
 			data: {},
 			originalError: null
-		})) as any;
+		});
 	}
 	try {
 		return {
@@ -220,66 +209,53 @@ export async function callService<
 	} catch (e) {
 		//TODO: error handling, what if server returns an array of errors for one field! :( // TODO: simulate this
 		if (!(e instanceof ApiError)) {
-			error = {
-				type: ErrorType.UNKNOWN_ERROR,
-				status: -1,
-				message: 'An unknown error has occurred, please try again',
-				data: e,
-				originalError: e
+			return {
+				success: false,
+				result: undefined,
+				error: await errorCallback({
+					type: ErrorType.UNKNOWN_ERROR,
+					status: -1,
+					message: 'An unknown error has occurred, please try again',
+					data: e,
+					originalError: e
+				})
 			};
-
-			if (errorCallback) {
-				return {
-					success: false,
-					result: undefined,
-					error: (await errorCallback(error)) as any
-				};
-			}
-			return { success: false, result: undefined, error: error as any };
 		}
 
 		if (e.status === 401) {
-			return (await _handleUnauthenticatedUser(errorCallback, {
+			return await _handleUnauthenticatedUser(errorCallback, {
 				type: ErrorType.UNAUTHORIZED,
 				status: e.status,
 				message: e.message,
 				data: e.body,
 				originalError: e
-			})) as any;
+			});
 		}
 		const parsedApiError = await errorSchema?.strip().partial().safeParseAsync(e.body.detail);
 		if (parsedApiError?.success) {
-			error = {
-				type: ErrorType.VALIDATION_ERROR,
-				status: e.status,
-				message: e.message,
-				data: parsedApiError.data,
-				originalError: e
-			};
-			if (errorCallback) {
-				return {
-					success: false,
-					result: undefined,
-					error: (await errorCallback(error)) as any
-				};
-			}
-			return { success: false, result: undefined, error: error as any };
-		}
-
-		error = {
-			type: ErrorType.API_ERROR,
-			status: e.status,
-			message: e.message,
-			data: e.body,
-			originalError: e
-		};
-		if (errorCallback) {
 			return {
 				success: false,
 				result: undefined,
-				error: (await errorCallback(error)) as any
+				error: await errorCallback({
+					type: ErrorType.VALIDATION_ERROR,
+					status: e.status,
+					message: e.message,
+					data: parsedApiError.data,
+					originalError: e
+				})
 			};
 		}
-		return { success: false, result: undefined, error: error as any };
+
+		return {
+			success: false,
+			result: undefined,
+			error: await errorCallback({
+				type: ErrorType.API_ERROR,
+				status: e.status,
+				message: e.message,
+				data: e.body,
+				originalError: e
+			})
+		};
 	}
 }

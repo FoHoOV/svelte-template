@@ -4,7 +4,8 @@ import {
 	type ErrorHandler,
 	genericPost,
 	type ServiceCallOptions,
-	callService
+	callService,
+	type ServiceError
 } from './client.universal';
 
 export const getToSvelte = async <TResponse, TError = unknown>(
@@ -27,14 +28,14 @@ export const postToSvelte = async <TResponse, TError = unknown>(
 
 export async function callServiceInClient<
 	TPromiseReturn,
-	TErrorCallbackPromiseReturn,
-	TSchema extends z.AnyZodObject
+	TSchema extends z.AnyZodObject,
+	TErrorCallbackReturn = ServiceError<TSchema>
 >({
 	serviceCall,
 	isTokenRequired = true,
 	errorSchema,
 	errorCallback
-}: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TSchema>) {
+}: ServiceCallOptions<TPromiseReturn, TSchema, TErrorCallbackReturn>) {
 	return await callService({
 		serviceCall: serviceCall,
 		isTokenRequired: isTokenRequired,

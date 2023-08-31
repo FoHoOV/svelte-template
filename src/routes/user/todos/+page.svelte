@@ -15,7 +15,6 @@
 	export let formElement: HTMLFormElement;
 	$: createTodoFormErrors = getFormErrors(form);
 	let isCreateTodosSubmitting = false;
-
 	async function fetchTodos() {
 		const fetchedTodos = await callServiceInClient({
 			serviceCall: async () => {

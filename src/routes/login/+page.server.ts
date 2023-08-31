@@ -19,9 +19,10 @@ export const actions: Actions = {
 		if (!validationsResult.success) {
 			return superFail(400, {
 				message: 'Invalid form, please review your inputs',
-				data: validationsResult.error.flatten().fieldErrors
+				error: validationsResult.error.flatten().fieldErrors
 			});
 		}
+
 		return await callServiceInFormActions({
 			serviceCall: async () => {
 				const token = await OAuthService.loginForAccessToken(validationsResult.data);

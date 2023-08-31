@@ -6,7 +6,7 @@
 	import { superEnhance, getFormErrors } from '$lib/enhance/form';
 	import { schema } from './validators';
 
-	export let form: ActionData;
+	export let form: ActionData;	
 	let isFormSubmitting: boolean = false;
 	$: validationErrors = getFormErrors(form);
 </script>

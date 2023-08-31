@@ -33,7 +33,7 @@
 	class="flex items-start justify-center card bg-base-300 w-full flex-row"
 >
 	<div class="card-body items-center text-center md:flex-grow-0 md:flex-shrink-0 md:w-1/2">
-		<Error message={form?.message} />
+		<Error message={validationErrors?.message} />
 
 		<FormInput name="username" className="w-full" errors={validationErrors?.errors?.username} />
 		<FormInput

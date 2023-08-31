@@ -18,7 +18,7 @@ export const actions: Actions = {
 		if (!validationsResult.success) {
 			return superFail(400, {
 				message: 'Invalid form, please review your inputs',
-				data: validationsResult.error.flatten().fieldErrors
+				error: validationsResult.error.flatten().fieldErrors
 			});
 		}
 
@@ -28,6 +28,7 @@ export const actions: Actions = {
 					...validationsResult.data
 				});
 			},
+			isTokenRequired: false,
 			errorSchema: TodoCreate
 		});
 	}

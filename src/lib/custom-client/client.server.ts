@@ -1,5 +1,5 @@
 import type { z } from 'zod';
-import { fail, redirect } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import {
 	callService,
 	ErrorType,
@@ -7,6 +7,7 @@ import {
 	type ServiceError
 } from './client.universal';
 import { superFail } from '$lib/enhance';
+import type { RequiredProperty } from '../utils';
 
 export async function applyAction<TSchema extends z.AnyZodObject>(e: ServiceError<TSchema>) {
 	switch (e.type) {
@@ -16,7 +17,7 @@ export async function applyAction<TSchema extends z.AnyZodObject>(e: ServiceErro
 		// 		data: e.data as unknown // TODO: enable this
 		// 	});
 		case ErrorType.VALIDATION_ERROR:
-			return superFail(400, { message: e.message, data: e.data });
+			return superFail(400, { message: e.message, error: e.data });
 		case ErrorType.UNAUTHORIZED:
 			throw redirect(303, '/login');
 		default:
@@ -24,28 +25,59 @@ export async function applyAction<TSchema extends z.AnyZodObject>(e: ServiceErro
 	}
 }
 
+
+export async function callServiceInFormActions<TPromiseReturn, TSchema extends z.AnyZodObject>({
+	serviceCall,
+	isTokenRequired = true,
+	errorSchema
+}: Omit<
+	ServiceCallOptions<TPromiseReturn, TSchema, Awaited<ReturnType<typeof applyAction<TSchema>>>>,
+	'errorCallback'
+>): Promise<
+	| { success: true; result: Awaited<TPromiseReturn>; error: undefined }
+	| Awaited<ReturnType<typeof applyAction<TSchema>>>
+>;
 export async function callServiceInFormActions<
 	TPromiseReturn,
-	TErrorCallbackPromiseReturn,
-	TSchema extends z.AnyZodObject
+	TSchema extends z.AnyZodObject,
+	TErrorCallbackReturn
 >({
 	serviceCall,
 	isTokenRequired = true,
 	errorSchema,
-	errorCallback = undefined
-}: ServiceCallOptions<TPromiseReturn, TErrorCallbackPromiseReturn, TSchema>) {
-	const result =  await callService({
+	errorCallback
+}: RequiredProperty<
+	ServiceCallOptions<TPromiseReturn, TSchema, TErrorCallbackReturn>,
+	'errorCallback'
+>): Promise<
+	{ success: true; result: Awaited<TPromiseReturn>; error: undefined } | TErrorCallbackReturn
+>;
+export async function callServiceInFormActions<
+	TPromiseReturn,
+	TSchema extends z.AnyZodObject,
+	TErrorCallbackReturn = never
+>({
+	serviceCall,
+	isTokenRequired = true,
+	errorSchema,
+	errorCallback = async (e) => {
+		return await applyAction(e);
+	}
+}: ServiceCallOptions<
+	TPromiseReturn,
+	TSchema,
+	TErrorCallbackReturn | Awaited<ReturnType<typeof applyAction<TSchema>>>
+>) {
+	const result = await callService({
 		serviceCall: serviceCall,
 		isTokenRequired: isTokenRequired,
 		errorSchema: errorSchema,
-		errorCallback: async (e) => {
-			if (errorCallback) {
-				return await errorCallback(e);
-			}
-			return await applyAction(e);
-		}
+		errorCallback: errorCallback
 	});
-	// overload for universal load required? why doesn't the conditional type work?
-	// create a new fail function btw, fuck the built-in
-	if(!result.success && result.error.type) {}
+
+	if (!result.success) {
+		return result.error;
+	} else {
+		return result;
+	}
 }

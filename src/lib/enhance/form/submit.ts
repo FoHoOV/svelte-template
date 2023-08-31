@@ -10,26 +10,45 @@ export type EnhanceOptions<TActionData = unknown> = {
 	form?: TActionData;
 };
 
-export type SubmitEvents<TSchema extends ZodType, TActionData extends {result?: TResult} | undefined | null  = any, TResult = unknown> = {
+export type SubmitEvents<
+	TSchema extends ZodType,
+	TActionData extends { result?: TResult } | undefined | null = any,
+	TResult = unknown
+> = {
 	'on:submitstarted'?: (e: CustomEvent<void>) => void;
 	'on:submitended'?: (e: CustomEvent<void>) => void;
 	'on:submitsucceeded'?: (
-		e: CustomEvent<{ response: NonNullable<NonNullable<TActionData>["result"]>; formData: z.infer<TSchema> }>
+		e: CustomEvent<{
+			response: NonNullable<NonNullable<TActionData>['result']>;
+			formData: z.infer<TSchema>;
+		}>
 	) => void;
 };
 
-export function superEnhance<TSchema extends ZodType,  TActionData extends {result?: TResult} | undefined | null  = any, TResult = unknown>(
+export function superEnhance<
+	TSchema extends ZodType,
+	TActionData extends { result?: TResult } | undefined | null = any,
+	TResult = unknown
+>(
 	node: HTMLFormElement,
 	options?: Partial<EnhanceOptions<TActionData>>
 ): ActionReturn<ValidatorOptions<TSchema>, SubmitEvents<TSchema, TActionData>>;
-export function superEnhance<TSchema extends ZodType,  TActionData extends {result?: TResult} | undefined | null  = any, TResult = unknown>(
+export function superEnhance<
+	TSchema extends ZodType,
+	TActionData extends { result?: TResult } | undefined | null = any,
+	TResult = unknown
+>(
 	node: HTMLFormElement,
 	options: { validator: ValidatorOptions<TSchema> } & Partial<EnhanceOptions<TActionData>>
 ): ActionReturn<
 	ValidatorOptions<TSchema>,
 	ValidatorErrorEvent<TSchema> & SubmitEvents<TSchema, TActionData>
 >;
-export function superEnhance<TSchema extends ZodType,  TActionData extends {result?: TResult} | undefined | null  = any, TResult = unknown>(
+export function superEnhance<
+	TSchema extends ZodType,
+	TActionData extends { result?: TResult } | undefined | null = any,
+	TResult = unknown
+>(
 	node: HTMLFormElement,
 	options?: { validator?: ValidatorOptions<TSchema> } & Partial<EnhanceOptions<TActionData>>
 ): ActionReturn<ValidatorOptions<TSchema>, SubmitEvents<TSchema, TActionData>> {

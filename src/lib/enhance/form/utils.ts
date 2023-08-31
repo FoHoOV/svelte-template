@@ -2,6 +2,7 @@ import { fail } from '@sveltejs/kit';
 import type { NumberRange, ErrorMessage } from '$lib/utils/types';
 import type { z } from 'zod';
 import type { ValidatorErrorsType } from './validator';
+import type { TscErrorInfo } from 'vitest';
 
 export function convertFormDataToObject(formData: FormData): Record<string, FormDataEntryValue> {
 	const result: Record<string, FormDataEntryValue> = {};
@@ -13,28 +14,31 @@ export function convertFormDataToObject(formData: FormData): Record<string, Form
 
 export type FailedActionProps<T> = {
 	message: ErrorMessage;
-	data?: T;
+	error?: T;
 };
 
-export function getFormErrors<Schema extends z.ZodType, Form extends {data?: ValidatorErrorsType<Schema> | undefined, message?: string | undefined} | null>(form: Form){
-	return {errors: form?.data, message: form?.message};
+export function getFormErrors<
+	Form extends { error?: TError | undefined; message?: ErrorMessage | undefined } | null,
+	TError = NonNullable<Form>['error']
+>(form: Form) {
+	return { errors: form?.error, message: form?.message };
 }
 
 export function failedActionData({ message }: FailedActionProps<undefined>): {
 	message: ErrorMessage;
-	data: undefined;
+	error: undefined;
 };
-export function failedActionData<T>({ message, data }: FailedActionProps<T>): {
+export function failedActionData<T>({ message, error }: FailedActionProps<T>): {
 	message: ErrorMessage;
-	data: T;
+	error: T;
 };
-export function failedActionData<T>({ message, data }: FailedActionProps<T>) {
-	return { message, data };
+export function failedActionData<T>({ message, error }: FailedActionProps<T>) {
+	return { message, error };
 }
 
 export function superFail<T = undefined>(
 	status: NumberRange<400, 600>,
-	{ message, data }: FailedActionProps<T>
+	{ message, error }: FailedActionProps<T>
 ) {
-	return fail(status, failedActionData({ message, data }));
+	return fail(status, failedActionData({ message, error }));
 }
