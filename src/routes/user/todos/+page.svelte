@@ -10,21 +10,28 @@
 	import { schema } from './validator';
 	import { callServiceInClient } from '$lib/custom-client/client.client';
 	import { browser } from '$app/environment';
+	import { ErrorType } from '$lib';
+	import { TodoCreate } from '$lib/client/zod/schemas';
 
 	export let form: ActionData;
 	export let formElement: HTMLFormElement;
 	$: createTodoFormErrors = getFormErrors(form);
 	let isCreateTodosSubmitting = false;
+
 	async function fetchTodos() {
 		const fetchedTodos = await callServiceInClient({
 			serviceCall: async () => {
 				return await TodoService.getForUser();
-			}
+			},
+			errorSchema: TodoCreate
 		});
 		if (fetchedTodos.success) {
 			todos.setTodos(fetchedTodos.result);
 		} else {
 			createTodoFormErrors!.message = fetchedTodos.error.message;
+			if(fetchedTodos.error.type === ErrorType.VALIDATION_ERROR){
+				createTodoFormErrors.errors = fetchedTodos.error.data;
+			}
 		}
 	}
 </script>
