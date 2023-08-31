@@ -10,8 +10,6 @@
 	import { schema } from './validator';
 	import { callServiceInClient } from '$lib/custom-client/client.client';
 	import { browser } from '$app/environment';
-	import { ErrorType } from '$lib';
-	import { TodoCreate } from '$lib/client/zod/schemas';
 
 	export let form: ActionData;
 	export let formElement: HTMLFormElement;

@@ -11,11 +11,11 @@ import type { RequiredProperty } from '../utils';
 
 export async function applyAction<TSchema extends z.AnyZodObject>(e: ServiceError<TSchema>) {
 	switch (e.type) {
-		// case ErrorType.API_ERROR:
-		// 	return superFail(404, {
-		// 		message: e.message,
-		// 		data: e.data as unknown // TODO: enable this
-		// 	});
+		case ErrorType.API_ERROR:
+			return superFail(404, {
+				message: e.message,
+				error: e.data as never
+			});
 		case ErrorType.VALIDATION_ERROR:
 			return superFail(400, { message: e.message, error: e.data });
 		case ErrorType.UNAUTHORIZED:
