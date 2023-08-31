@@ -65,7 +65,7 @@ export function superEnhance<
 					node.dispatchEvent(
 						new CustomEvent('submitsucceeded', {
 							detail: {
-								response: result.data,
+								response: result.data?.result,
 								formData: Object.fromEntries(formData)
 							}
 						})

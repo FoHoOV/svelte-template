@@ -28,7 +28,6 @@ export const actions: Actions = {
 					...validationsResult.data
 				});
 			},
-			isTokenRequired: false,
 			errorSchema: TodoCreate
 		});
 	}
