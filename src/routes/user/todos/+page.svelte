@@ -22,16 +22,12 @@
 		const fetchedTodos = await callServiceInClient({
 			serviceCall: async () => {
 				return await TodoService.getForUser();
-			},
-			errorSchema: TodoCreate
+			}
 		});
 		if (fetchedTodos.success) {
 			todos.setTodos(fetchedTodos.result);
 		} else {
 			createTodoFormErrors!.message = fetchedTodos.error.message;
-			if(fetchedTodos.error.type === ErrorType.VALIDATION_ERROR){
-				createTodoFormErrors.errors = fetchedTodos.error.data;
-			}
 		}
 	}
 </script>
