@@ -91,13 +91,13 @@ export const postToExternal = async <TResponse, TError = unknown>(
 const _handleUnauthenticatedUser = async <TSchema extends z.AnyZodObject, TPromise>(
 	errorCallback: (error: ServiceError<TSchema>) => TPromise,
 	error: ServiceError<TSchema>
-): Promise<{ success: false; error: Awaited<TPromise>; result: undefined }> => {
+): Promise<{ success: false; error: Awaited<TPromise> }> => {
 	OpenAPI.TOKEN = undefined;
 	const result = await errorCallback(error);
 	if (browser) {
 		// TODO:
 		await goto('/login');
-		return { success: false, result: undefined, error: result };
+		return { success: false, error: result };
 	} else {
 		throw redirect(303, '/login');
 	}
@@ -182,10 +182,9 @@ export async function callService<
 }: ServiceCallOptions<TPromiseReturn, TSchema, TErrorCallbackReturn>): Promise<
 	| {
 			success: false;
-			result: undefined;
 			error: TErrorCallbackReturn;
 	  }
-	| { success: true; result: Awaited<TPromiseReturn>; error: undefined }
+	| { success: true; result: Awaited<TPromiseReturn> }
 > {
 	if (isTokenRequired && !(await isTokenExpirationDateValidAsync(OpenAPI.TOKEN))) {
 		return await _handleUnauthenticatedUser(errorCallback, {
@@ -199,15 +198,13 @@ export async function callService<
 	try {
 		return {
 			success: true,
-			result: await serviceCall(),
-			error: undefined
+			result: await serviceCall()
 		};
 	} catch (e) {
 		//TODO: error handling, what if server returns an array of errors for one field! :( // TODO: simulate this
 		if (!(e instanceof ApiError)) {
 			return {
 				success: false,
-				result: undefined,
 				error: await errorCallback({
 					type: ErrorType.UNKNOWN_ERROR,
 					status: -1,
@@ -231,7 +228,6 @@ export async function callService<
 		if (parsedApiError?.success) {
 			return {
 				success: false,
-				result: undefined,
 				error: await errorCallback({
 					type: ErrorType.VALIDATION_ERROR,
 					status: e.status,
@@ -244,7 +240,6 @@ export async function callService<
 
 		return {
 			success: false,
-			result: undefined,
 			error: await errorCallback({
 				type: ErrorType.API_ERROR,
 				status: e.status,
