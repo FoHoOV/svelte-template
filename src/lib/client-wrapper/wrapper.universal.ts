@@ -1,5 +1,5 @@
 import { browser } from '$app/environment';
-import { goto } from '$app/navigation';
+import { goto, invalidateAll } from '$app/navigation';
 import { PUBLIC_API_URL } from '$env/static/public';
 import { redirect } from '@sveltejs/kit';
 import type { z } from 'zod';
@@ -92,10 +92,11 @@ const _handleUnauthenticatedUser = async <TSchema extends z.AnyZodObject, TPromi
 ): Promise<{ success: false; error: Awaited<TPromise> }> => {
 	const result = await errorCallback(error);
 	if (browser) {
-		await goto('/login');
+		await invalidateAll();
+		await goto('/user/logout?session-expired=true');
 		return { success: false, error: result };
 	} else {
-		throw redirect(303, '/login');
+		throw redirect(303, '/user/logout?session-expired=true');
 	}
 };
 
@@ -221,7 +222,7 @@ export async function callService<
 				type: ErrorType.UNAUTHORIZED,
 				status: -1,
 				message: e.message,
-				data: { detail: 'Token has expired (client-side validations).' },
+				data: { detail: 'Invalid (client-side validations).' },
 				originalError: e
 			});
 		}

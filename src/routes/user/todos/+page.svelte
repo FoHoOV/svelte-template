@@ -10,6 +10,7 @@
 	import { TodoClient } from '$lib/client-wrapper/clients';
 	import { callServiceInClient } from '$lib/client-wrapper/wrapper.client';
 	import { page } from '$app/stores';
+	import { browser } from '$app/environment';
 
 	export let form: ActionData;
 	export let formElement: HTMLFormElement;
@@ -32,10 +33,11 @@
 				return await TodoClient({ token: $page.data.token }).getForUser('all');
 			}
 		});
+
 		if (fetchedTodos.success) {
 			todos.setTodos(fetchedTodos.result);
 		} else {
-			createTodoFormErrors.message = fetchedTodos.error.message;
+			Promise.reject({ message: fetchedTodos.error.message });
 		}
 	}
 </script>
@@ -122,18 +124,20 @@
 	{/await}
 {/if} -->
 
-<!-- or stream  the data from load function-->
-{#await fetchTodos()}
-	<span class="loading loading-ring m-auto block" />
-{:then}
-	<div class="grid grid-cols-2 center gap-2">
-		<div>
-			<TodoList todos={$todos} done={false} />
+<!-- or stream  the data from load function, which cannot be done if the request throws an error (see this  page's server load function for more info)-->
+{#if browser}
+	{#await fetchTodos()}
+		<span class="loading loading-ring m-auto block" />
+	{:then}
+		<div class="grid grid-cols-2 center gap-2">
+			<div>
+				<TodoList todos={$todos} done={false} />
+			</div>
+			<div>
+				<TodoList todos={$todos} done={true} />
+			</div>
 		</div>
-		<div>
-			<TodoList todos={$todos} done={true} />
-		</div>
-	</div>
-{:catch error}
-	<Error message={error.message} />
-{/await}
+	{:catch error}
+		<Error message={error.message} />
+	{/await}
+{/if}
