@@ -1,11 +1,13 @@
 import { PUBLIC_API_URL } from '$env/static/public';
 import { decodeJwt, type JWTPayload } from 'jose';
 import { OAuthApi, TodoApi, UserApi } from '../client/apis';
+
 import {
 	Configuration,
 	type ConfigurationParameters,
 	type RequestContext
 } from '../client/runtime';
+import type { Token } from '../client/models';
 
 export class TokenError extends Error {
 	constructor(message: string) {
@@ -13,7 +15,7 @@ export class TokenError extends Error {
 	}
 }
 
-export async function isTokenExpirationDateValidAsync(token: string) {
+export async function isTokenExpirationDateValidAsync(token?: string) {
 	if (!token) {
 		return false;
 	}
@@ -27,53 +29,64 @@ export async function isTokenExpirationDateValidAsync(token: string) {
 	return true;
 }
 
-const checkAccessToken = async (context: RequestContext, isTokenRequired?: boolean) => {
-	if (!isTokenRequired) {
+const checkAccessToken = async (context: RequestContext, config?: ConfigurationOptions) => {
+	if (config?.isTokenRequired === false) {
 		return;
 	}
 
-	if (await isTokenExpirationDateValidAsync('context.init.headers?')) {
-		return;
+	const headers = context.init.headers ? new Headers(context.init.headers) : new Headers();
+
+	const accessToken = headers.get('Authorization') ?? undefined;
+
+	if (!accessToken) {
+		throw new TokenError('token required');
 	}
 
-	throw new TokenError('token has expired');
+	if (!(await isTokenExpirationDateValidAsync(accessToken))) {
+		throw new TokenError('token has expired');
+	}
+
+	if (accessToken) {
+		headers.set('Authorization', `${config?.token?.token_type ?? 'bearer'} ${accessToken}`);
+	}
+
+	context.init.headers = headers;
 };
 
-export const OAuthClient = (
-	config?: Partial<ConfigurationParameters> & { isTokenRequired?: boolean }
-) => {
+type ConfigurationOptions = Partial<Omit<ConfigurationParameters, 'accessToken'>> & {
+	token?: Token;
+	isTokenRequired?: boolean;
+};
+
+export const OAuthClient = (config: ConfigurationOptions = { isTokenRequired: true }) => {
 	return new OAuthApi(
 		new Configuration({
-			accessToken: config?.accessToken,
+			accessToken: config?.token?.access_token,
 			basePath: PUBLIC_API_URL
 		})
 	).withPreMiddleware(async (context) => {
-		return await checkAccessToken(context, config?.isTokenRequired ?? true);
+		return await checkAccessToken(context, config);
 	});
 };
 
-export const TodoClient = (
-	config?: Partial<ConfigurationParameters> & { isTokenRequired?: boolean }
-) => {
+export const TodoClient = (config?: ConfigurationOptions) => {
 	return new TodoApi(
 		new Configuration({
-			accessToken: config?.accessToken,
+			accessToken: config?.token?.access_token,
 			basePath: PUBLIC_API_URL
 		})
 	).withPreMiddleware(async (context) => {
-		return await checkAccessToken(context, config?.isTokenRequired ?? true);
+		return await checkAccessToken(context, config);
 	});
 };
 
-export const UserClient = (
-	config?: Partial<ConfigurationParameters> & { isTokenRequired?: boolean }
-) => {
+export const UserClient = (config?: ConfigurationOptions) => {
 	return new UserApi(
 		new Configuration({
-			accessToken: config?.accessToken,
+			accessToken: config?.token?.access_token,
 			basePath: PUBLIC_API_URL
 		})
 	).withPreMiddleware(async (context) => {
-		return await checkAccessToken(context, config?.isTokenRequired ?? true);
+		return await checkAccessToken(context, config);
 	});
 };

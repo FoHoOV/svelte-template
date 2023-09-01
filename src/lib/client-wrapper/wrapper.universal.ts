@@ -2,7 +2,6 @@ import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 import { PUBLIC_API_URL } from '$env/static/public';
 import { redirect } from '@sveltejs/kit';
-import { decodeJwt, type JWTPayload } from 'jose';
 import type { z } from 'zod';
 import type { ErrorMessage } from '$lib/utils/types';
 import { RequiredError, FetchError, ResponseError } from '../client/runtime';
@@ -93,7 +92,6 @@ const _handleUnauthenticatedUser = async <TSchema extends z.AnyZodObject, TPromi
 ): Promise<{ success: false; error: Awaited<TPromise> }> => {
 	const result = await errorCallback(error);
 	if (browser) {
-		// TODO:
 		await goto('/login');
 		return { success: false, error: result };
 	} else {

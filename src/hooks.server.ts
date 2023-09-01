@@ -5,15 +5,15 @@ import { sequence } from '@sveltejs/kit/hooks';
 import { isTokenExpirationDateValidAsync } from './lib/client-wrapper/clients';
 
 export const setAuthorizationToken: Handle = async ({ event, resolve }) => {
-	let token = event.cookies.get(KEYS.token);
-
-	if (token && !(await isTokenExpirationDateValidAsync(token))) {
-		event.cookies.delete(KEYS.token);
-		token = undefined;
-	}
+	const token = event.cookies.get(KEYS.token);
 
 	if (token) {
-		event.locals.token = JSON.parse(token) as Token;
+		let parsedToken: Token | undefined = JSON.parse(token) as Token;
+		if (!(await isTokenExpirationDateValidAsync(parsedToken.access_token))) {
+			event.cookies.delete(KEYS.token);
+			parsedToken = undefined;
+		}
+		event.locals.token = parsedToken;
 	}
 
 	return await resolve(event);

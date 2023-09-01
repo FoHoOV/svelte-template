@@ -6,13 +6,13 @@ import { schema } from './validators';
 import { Body_login_for_access_token } from '$lib/client/zod/schemas';
 import { superApplyAction, callServiceInFormActions } from '$lib/client-wrapper';
 import { ErrorType } from '$lib/client-wrapper/wrapper.universal';
-import { OAuthClient } from '../../lib/client-wrapper/clients';
+import { OAuthClient } from '$lib/client-wrapper/clients';
 
 export const load = (async () => {
 	return {};
 }) satisfies PageServerLoad;
 export const actions: Actions = {
-	default: async ({ request, locals, cookies }) => {
+	default: async ({ request, cookies }) => {
 		const formData = await request.formData();
 
 		const validationsResult = await schema.safeParseAsync(convertFormDataToObject(formData));
@@ -26,7 +26,7 @@ export const actions: Actions = {
 		return await callServiceInFormActions({
 			serviceCall: async () => {
 				const token = await OAuthClient({
-					accessToken: locals.token?.access_token
+					isTokenRequired: false
 				}).loginForAccessToken(validationsResult.data.username, validationsResult.data.password);
 				cookies.set(KEYS.token, JSON.stringify(token), { secure: true, httpOnly: true, path: '/' });
 				throw redirect(303, '/user/todos');

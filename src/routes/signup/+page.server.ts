@@ -4,14 +4,14 @@ import { convertFormDataToObject, superFail } from '$lib/enhance/form';
 import { schema } from './validators';
 import { UserCreate } from '$lib/client/zod/schemas';
 import { callServiceInFormActions } from '$lib/client-wrapper';
-import { UserClient } from '../../lib/client-wrapper/clients';
+import { UserClient } from '$lib/client-wrapper/clients';
 
 export const load = (async () => {
 	return {};
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
-	default: async ({ request, locals }) => {
+	default: async ({ request }) => {
 		const formData = await request.formData();
 
 		const validationsResult = await schema.safeParseAsync(convertFormDataToObject(formData));
@@ -21,10 +21,12 @@ export const actions: Actions = {
 				error: validationsResult.error.flatten().fieldErrors
 			});
 		}
-		
+
 		return await callServiceInFormActions({
 			serviceCall: async () => {
-				await UserClient({accessToken: locals.token?.access_token}).signup(validationsResult.data);
+				await UserClient({
+					isTokenRequired: false
+				}).signup(validationsResult.data);
 				throw redirect(303, '/login');
 			},
 			errorSchema: UserCreate

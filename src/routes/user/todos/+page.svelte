@@ -7,15 +7,31 @@
 	import type { ActionData, PageData } from './$types';
 	import todos from '$lib/stores/todos';
 	import { schema } from './validator';
+	import { TodoClient } from '$lib/client-wrapper/clients';
+	import { callServiceInClient } from '$lib/client-wrapper/wrapper.client';
+	import { page } from '$app/stores';
 
-	export let data: PageData;
 	export let form: ActionData;
 	export let formElement: HTMLFormElement;
 	$: createTodoFormErrors = getFormErrors(form);
 	let isCreateTodosSubmitting = false;
 
-	async function resolveTodos() {
-		const fetchedTodos = await data.streamed.todos;
+	// this doesn't work see page.server function comments on this
+	// async function resolveTodos() {
+	// 	const fetchedTodos = await data.streamed.todos;
+	// 	if (fetchedTodos.success) {
+	// 		todos.setTodos(fetchedTodos.result);
+	// 	} else {
+	// 		createTodoFormErrors.message = fetchedTodos.error.message;
+	// 	}
+	// }
+
+	async function fetchTodos() {
+		const fetchedTodos = await callServiceInClient({
+			serviceCall: async () => {
+				return await TodoClient({ token: $page.data.token }).getForUser('all');
+			}
+		});
 		if (fetchedTodos.success) {
 			todos.setTodos(fetchedTodos.result);
 		} else {
@@ -107,7 +123,7 @@
 {/if} -->
 
 <!-- or stream  the data from load function-->
-{#await resolveTodos()}
+{#await fetchTodos()}
 	<span class="loading loading-ring m-auto block" />
 {:then}
 	<div class="grid grid-cols-2 center gap-2">

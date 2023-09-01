@@ -3,19 +3,21 @@ import type { PageServerLoad } from './$types';
 import { convertFormDataToObject, superFail } from '$lib/enhance/form';
 import { schema } from './validator';
 import { TodoCreate } from '$lib/client/zod/schemas';
-import { callService, callServiceInFormActions } from '$lib/client-wrapper';
+import { callServiceInFormActions } from '$lib/client-wrapper';
 import { TodoClient } from '$lib/client-wrapper/clients';
 
-export const load = (async ({locals}) => {
-	return {
-		streamed: {
-			todos: callService({
-				serviceCall: async () => await TodoClient({accessToken: locals.token?.access_token}).getForUser({
-					status: 'all'
-				})
-			})
-		}
-	};
+export const load = (async ({ locals }) => {
+	// https://github.com/sveltejs/kit/issues/9785
+	// if we reject or throw a redirect in streamed promises it doesn't work for now
+	// we have to wait for a fix :()
+	// return {
+	// 	streamed: {
+	// 		todos: callService({
+	// 			serviceCall: async () => await TodoClient({accessToken: locals.token?.access_token}).getForUser('all')
+	// 		})
+	// 	}
+	// };
+	return {};
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
@@ -32,7 +34,7 @@ export const actions: Actions = {
 
 		return await callServiceInFormActions({
 			serviceCall: async () => {
-				return await TodoClient({accessToken: locals.token?.access_token}).createForUser({
+				return await TodoClient({ token: locals.token }).createForUser({
 					...validationsResult.data
 				});
 			},

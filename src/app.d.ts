@@ -11,7 +11,10 @@ declare global {
 		interface Locals {
 			token?: Token;
 		}
-		// interface PageData {}
+		
+		interface PageData {
+			token?: Token;
+		}
 		// interface Platform {}
 	}
 }
