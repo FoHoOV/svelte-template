@@ -4,10 +4,16 @@ import { TodoService } from '$lib/client';
 import { convertFormDataToObject, superFail } from '$lib/enhance/form';
 import { schema } from './validator';
 import { TodoCreate } from '$lib/client/zod/schemas';
-import { callServiceInFormActions } from '$lib/custom-client';
+import { callService, callServiceInFormActions } from '$lib/custom-client';
 
 export const load = (async () => {
-	return {};
+	return {
+		streamed: {
+			todos: callService({
+				serviceCall: async () => await TodoService.getForUser()
+			})
+		}
+	};
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {

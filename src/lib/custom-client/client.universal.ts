@@ -93,18 +93,14 @@ const _handleUnauthenticatedUser = async <TSchema extends z.AnyZodObject, TPromi
 	error: ServiceError<TSchema>
 ): Promise<{ success: false; error: Awaited<TPromise>; result: undefined }> => {
 	OpenAPI.TOKEN = undefined;
-
-	return {
-		success: false,
-		result: undefined,
-		error: await errorCallback(error)
-	};
-	// if (browser) { // TODO:
-	// 	await goto('/login');
-	// 	return { success: false, result: undefined, error: error };
-	// } else {
-	// 	throw redirect(303, '/login');
-	// }
+	const result = await errorCallback(error);
+	if (browser) {
+		// TODO:
+		await goto('/login');
+		return { success: false, result: undefined, error: result };
+	} else {
+		throw redirect(303, '/login');
+	}
 };
 
 type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;

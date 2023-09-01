@@ -4,28 +4,22 @@
 	import TodoList from '$lib/components/todo/TodoList.svelte';
 	import Error from '$components/Error.svelte';
 	import { getFormErrors, superEnhance } from '$lib/enhance/form';
-	import type { ActionData } from './$types';
-	import { TodoService, type Todo } from '$lib/client';
+	import type { ActionData, PageData } from './$types';
 	import todos from '$lib/stores/todos';
 	import { schema } from './validator';
-	import { callServiceInClient } from '$lib/custom-client/client.client';
-	import { browser } from '$app/environment';
 
+	export let data: PageData;
 	export let form: ActionData;
 	export let formElement: HTMLFormElement;
 	$: createTodoFormErrors = getFormErrors(form);
 	let isCreateTodosSubmitting = false;
 
-	async function fetchTodos() {
-		const fetchedTodos = await callServiceInClient({
-			serviceCall: async () => {
-				return await TodoService.getForUser();
-			}
-		});
+	async function resolveTodos() {
+		const fetchedTodos = await data.streamed.todos;
 		if (fetchedTodos.success) {
 			todos.setTodos(fetchedTodos.result);
 		} else {
-			createTodoFormErrors!.message = fetchedTodos.error.message;
+			createTodoFormErrors.message = fetchedTodos.error.message;
 		}
 	}
 </script>
@@ -95,7 +89,7 @@
 <div class="divider" />
 
 <!-- we should not call await without <if browser> here because server-side rendering will not wait for this to finish-->
-{#if browser}
+<!-- {#if browser}
 	{#await fetchTodos()}
 		<span class="loading loading-ring m-auto block" />
 	{:then}
@@ -110,4 +104,20 @@
 	{:catch error}
 		<Error message={error.message} />
 	{/await}
-{/if}
+{/if} -->
+
+<!-- or stream  the data from load function-->
+{#await resolveTodos()}
+	<span class="loading loading-ring m-auto block" />
+{:then}
+	<div class="grid grid-cols-2 center gap-2">
+		<div>
+			<TodoList todos={$todos} done={false} />
+		</div>
+		<div>
+			<TodoList todos={$todos} done={true} />
+		</div>
+	</div>
+{:catch error}
+	<Error message={error.message} />
+{/await}
