@@ -5,11 +5,11 @@ import {
 	ErrorType,
 	type ServiceCallOptions,
 	type ServiceError
-} from './client.universal';
+} from './wrapper.universal';
 import { superFail } from '$lib/enhance';
 import type { RequiredProperty } from '../utils';
 
-export async function applyAction<TSchema extends z.AnyZodObject>(e: ServiceError<TSchema>) {
+export async function superApplyAction<TSchema extends z.AnyZodObject>(e: ServiceError<TSchema>) {
 	switch (e.type) {
 		case ErrorType.API_ERROR:
 			return superFail(404, {
@@ -32,10 +32,10 @@ export async function callServiceInFormActions<TPromiseReturn, TSchema extends z
 }: ServiceCallOptions<
 	TPromiseReturn,
 	TSchema,
-	Awaited<ReturnType<typeof applyAction<TSchema>>>
+	Awaited<ReturnType<typeof superApplyAction<TSchema>>>
 >): Promise<
 	| { success: true; result: Awaited<TPromiseReturn>; error: undefined }
-	| Awaited<ReturnType<typeof applyAction<TSchema>>>
+	| Awaited<ReturnType<typeof superApplyAction<TSchema>>>
 >;
 export async function callServiceInFormActions<
 	TPromiseReturn,
@@ -61,12 +61,12 @@ export async function callServiceInFormActions<
 	isTokenRequired = true,
 	errorSchema,
 	errorCallback = async (e) => {
-		return await applyAction(e);
+		return await superApplyAction(e);
 	}
 }: ServiceCallOptions<
 	TPromiseReturn,
 	TSchema,
-	TErrorCallbackReturn | Awaited<ReturnType<typeof applyAction<TSchema>>>
+	TErrorCallbackReturn | Awaited<ReturnType<typeof superApplyAction<TSchema>>>
 >) {
 	const result = await callService({
 		serviceCall: serviceCall,

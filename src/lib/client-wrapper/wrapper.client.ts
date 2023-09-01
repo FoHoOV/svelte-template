@@ -6,7 +6,7 @@ import {
 	type ServiceCallOptions,
 	callService,
 	type ServiceError
-} from './client.universal';
+} from './wrapper.universal';
 
 export const getToSvelte = async <TResponse, TError = unknown>(
 	endPoint: string,

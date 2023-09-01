@@ -4,7 +4,7 @@ import { UserService } from '$lib/client';
 import { convertFormDataToObject, superFail } from '$lib/enhance/form';
 import { schema } from './validators';
 import { UserCreate } from '$lib/client/zod/schemas';
-import { applyAction, callServiceInFormActions } from '$lib/custom-client';
+import { callServiceInFormActions } from '$lib/client-wrapper';
 
 export const load = (async () => {
 	return {};

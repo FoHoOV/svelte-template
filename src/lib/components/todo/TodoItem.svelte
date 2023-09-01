@@ -5,7 +5,7 @@
 	import { TodoService } from '$lib/client';
 	import Error from '$components/Error.svelte';
 	import Fa from 'svelte-fa/src/fa.svelte';
-	import { callServiceInClient } from '$lib/custom-client/client.client';
+	import { callServiceInClient } from '$lib/client-wrapper/wrapper.client';
 
 	export let todo: Todo;
 	let isCallingService: boolean = false;

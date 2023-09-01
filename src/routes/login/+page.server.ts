@@ -5,8 +5,8 @@ import { OAuthService } from '$lib/client';
 import { convertFormDataToObject, superFail } from '$lib/enhance/form';
 import { schema } from './validators';
 import { Body_login_for_access_token } from '$lib/client/zod/schemas';
-import { applyAction, callServiceInFormActions } from '$lib/custom-client';
-import { ErrorType } from '$lib/custom-client/client.universal';
+import { superApplyAction, callServiceInFormActions } from '$lib/client-wrapper';
+import { ErrorType } from '$lib/client-wrapper/wrapper.universal';
 
 export const load = (async () => {
 	return {};
@@ -35,7 +35,7 @@ export const actions: Actions = {
 						message: (e.data as any).detail as string
 					});
 				}
-				return await applyAction(e);
+				return await superApplyAction(e);
 			},
 			isTokenRequired: false,
 			errorSchema: Body_login_for_access_token
