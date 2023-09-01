@@ -13,11 +13,12 @@
 		"format": "prettier --plugin-search-dir . --write .",
 		"test:integration": "playwright test",
 		"test:unit": "vitest",
-		"open-api:generate": "openapi --input http://127.0.0.1:8080/openapi.json --output ./src/lib/client --exportSchemas true --client fetch && npm run open-api:zod",
+		"open-api:generate": "openapi-generator-cli generate --generator-key typescript-fetch && npm run open-api:zod",
 		"open-api:zod-partial-support": "node generate-zod.js",
 		"open-api:zod": "mkdirp ./src/lib/client/zod && typed-openapi http://127.0.0.1:8080/openapi.json -o ./src/lib/client/zod/schemas.ts --runtime zod"
 	},
 	"devDependencies": {
+		"@openapitools/openapi-generator-cli": "^2.7.0",
 		"@playwright/test": "^1.28.1",
 		"@sveltejs/adapter-auto": "^2.0.0",
 		"@sveltejs/kit": "^1.20.4",

@@ -32,13 +32,11 @@ export async function callServiceInClient<
 	TErrorCallbackReturn = ServiceError<TSchema>
 >({
 	serviceCall,
-	isTokenRequired = true,
 	errorSchema,
 	errorCallback
 }: ServiceCallOptions<TPromiseReturn, TSchema, TErrorCallbackReturn>) {
 	return await callService({
 		serviceCall: serviceCall,
-		isTokenRequired: isTokenRequired,
 		errorSchema: errorSchema,
 		errorCallback: errorCallback
 	});

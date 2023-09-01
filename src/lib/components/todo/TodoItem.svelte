@@ -2,10 +2,11 @@
 	import { faCheckCircle, faTrashCan, faUndo } from '@fortawesome/free-solid-svg-icons';
 	import todos from '$lib/stores/todos';
 	import type { Todo } from '$lib/client/models/Todo';
-	import { TodoService } from '$lib/client';
 	import Error from '$components/Error.svelte';
 	import Fa from 'svelte-fa/src/fa.svelte';
 	import { callServiceInClient } from '$lib/client-wrapper/wrapper.client';
+	import { TodoClient } from '../../client-wrapper/clients';
+	import { page } from '$app/stores';
 
 	export let todo: Todo;
 	let isCallingService: boolean = false;
@@ -15,7 +16,7 @@
 		isCallingService = true;
 		await callServiceInClient({
 			serviceCall: async () => {
-				await TodoService.update({ ...todo, is_done: !todo.is_done });
+				await TodoClient($page.data.token).update({ todo: { ...todo, is_done: !todo.is_done } });
 				todos.updateTodo(todo, !todo.is_done);
 				isCallingService = false;
 			},
@@ -30,7 +31,7 @@
 		isCallingService = true;
 		await callServiceInClient({
 			serviceCall: async () => {
-				await TodoService.remove(todo);
+				await TodoClient($page.data.token).remove({ todo });
 				todos.removeTodo(todo);
 				isCallingService = false;
 			},

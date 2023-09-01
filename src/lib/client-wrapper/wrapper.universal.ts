@@ -2,12 +2,11 @@ import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 import { PUBLIC_API_URL } from '$env/static/public';
 import { redirect } from '@sveltejs/kit';
-import { ApiError, OpenAPI } from '../client';
 import { decodeJwt, type JWTPayload } from 'jose';
-import type { ApiRequestOptions } from '../client/core/ApiRequestOptions';
 import type { z } from 'zod';
 import type { ErrorMessage } from '$lib/utils/types';
-import type { Awaitable } from 'vitest';
+import { RequiredError, FetchError, ResponseError } from '../client/runtime';
+import { TokenError } from './clients';
 
 export const createRequest = (url: string, token?: string): Request => {
 	const request = new Request(url);
@@ -92,7 +91,6 @@ const _handleUnauthenticatedUser = async <TSchema extends z.AnyZodObject, TPromi
 	errorCallback: (error: ServiceError<TSchema>) => TPromise,
 	error: ServiceError<TSchema>
 ): Promise<{ success: false; error: Awaited<TPromise> }> => {
-	OpenAPI.TOKEN = undefined;
 	const result = await errorCallback(error);
 	if (browser) {
 		// TODO:
@@ -102,30 +100,6 @@ const _handleUnauthenticatedUser = async <TSchema extends z.AnyZodObject, TPromi
 		throw redirect(303, '/login');
 	}
 };
-
-type Resolver<T> = (options: ApiRequestOptions) => Promise<T>;
-
-export async function isTokenExpirationDateValidAsync(
-	token: string | Resolver<string> | undefined
-) {
-	if (typeof token === 'function') {
-		token = await token({
-			url: '',
-			method: 'HEAD'
-		});
-	}
-	if (!token) {
-		return false;
-	}
-	const parsedToken: JWTPayload = decodeJwt(token);
-	if (!parsedToken.exp) {
-		throw Error('expiration token not found in jwt');
-	}
-	if (parsedToken.exp * 1000 < Date.now()) {
-		return false;
-	}
-	return true;
-}
 
 export enum ErrorType {
 	VALIDATION_ERROR,
@@ -139,15 +113,15 @@ export type ServiceError<TSchema extends z.AnyZodObject> =
 			type: ErrorType.VALIDATION_ERROR;
 			message: ErrorMessage;
 			status: number;
-			data: z.infer<TSchema>; // TODO: we should error if TSchema is undefined here
-			originalError: ApiError;
+			data: z.infer<TSchema>;
+			originalError: ResponseError | RequiredError | FetchError;
 	  }
 	| {
 			type: ErrorType.API_ERROR;
 			message: ErrorMessage;
 			status: number;
 			data: unknown;
-			originalError: ApiError;
+			originalError: ResponseError | RequiredError | FetchError;
 	  }
 	| {
 			type: ErrorType.UNKNOWN_ERROR | ErrorType.UNAUTHORIZED;
@@ -164,7 +138,6 @@ export type ServiceCallOptions<
 > = {
 	serviceCall: () => Promise<TPromiseReturn>;
 	errorSchema?: TSchema;
-	isTokenRequired?: boolean;
 	errorCallback?: (e: ServiceError<TSchema>) => Promise<TErrorCallbackReturn>;
 };
 
@@ -174,7 +147,6 @@ export async function callService<
 	TErrorCallbackReturn = ServiceError<TSchema>
 >({
 	serviceCall,
-	isTokenRequired = true,
 	errorSchema,
 	errorCallback = async (e) => {
 		return e as any;
@@ -186,27 +158,17 @@ export async function callService<
 	  }
 	| { success: true; result: Awaited<TPromiseReturn> }
 > {
-	if (isTokenRequired && !(await isTokenExpirationDateValidAsync(OpenAPI.TOKEN))) {
-		return await _handleUnauthenticatedUser(errorCallback, {
-			type: ErrorType.UNAUTHORIZED,
-			status: -1,
-			message: 'Unauthorized, token has expired.',
-			data: {},
-			originalError: null
-		});
-	}
 	try {
 		return {
 			success: true,
 			result: await serviceCall()
 		};
 	} catch (e) {
-		//TODO: error handling, what if server returns an array of errors for one field! :( // TODO: simulate this
-		if (!(e instanceof ApiError)) {
+		if (e instanceof FetchError) {
 			return {
 				success: false,
 				error: await errorCallback({
-					type: ErrorType.UNKNOWN_ERROR,
+					type: ErrorType.API_ERROR,
 					status: -1,
 					message: 'An unknown error has occurred, please try again',
 					data: e,
@@ -215,36 +177,64 @@ export async function callService<
 			};
 		}
 
-		if (e.status === 401) {
-			return await _handleUnauthenticatedUser(errorCallback, {
-				type: ErrorType.UNAUTHORIZED,
-				status: e.status,
-				message: e.message,
-				data: e.body,
-				originalError: e
-			});
-		}
-		const parsedApiError = await errorSchema?.strip().partial().safeParseAsync(e.body.detail);
-		if (parsedApiError?.success) {
+		if (e instanceof RequiredError) {
 			return {
 				success: false,
 				error: await errorCallback({
-					type: ErrorType.VALIDATION_ERROR,
-					status: e.status,
+					type: ErrorType.API_ERROR,
+					status: -1,
 					message: e.message,
-					data: parsedApiError.data,
+					data: e,
 					originalError: e
 				})
 			};
 		}
 
+		if (e instanceof ResponseError) {
+			if (e.response.status === 401) {
+				return await _handleUnauthenticatedUser(errorCallback, {
+					type: ErrorType.UNAUTHORIZED,
+					status: e.response.status,
+					message: e.message,
+					data: await e.response.json(),
+					originalError: e
+				});
+			}
+			const parsedApiError = await errorSchema
+				?.strip()
+				.partial()
+				.safeParseAsync((await e.response.json()).detail);
+			if (parsedApiError?.success) {
+				return {
+					success: false,
+					error: await errorCallback({
+						type: ErrorType.VALIDATION_ERROR,
+						status: e.response.status,
+						message: e.message,
+						data: parsedApiError.data,
+						originalError: e
+					})
+				};
+			}
+		}
+
+		if (e instanceof TokenError) {
+			return await _handleUnauthenticatedUser(errorCallback, {
+				type: ErrorType.UNAUTHORIZED,
+				status: -1,
+				message: e.message,
+				data: { detail: 'Token has expired (client-side validations).' },
+				originalError: e
+			});
+		}
+
 		return {
 			success: false,
 			error: await errorCallback({
-				type: ErrorType.API_ERROR,
-				status: e.status,
-				message: e.body.detail ?? e.message,
-				data: e.body,
+				type: ErrorType.UNKNOWN_ERROR,
+				status: -1,
+				message: 'An unknown error has occurred, please try again',
+				data: e,
 				originalError: e
 			})
 		};

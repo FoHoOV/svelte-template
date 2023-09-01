@@ -1,17 +1,17 @@
 import { redirect, type Actions } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { UserService } from '$lib/client';
 import { convertFormDataToObject, superFail } from '$lib/enhance/form';
 import { schema } from './validators';
 import { UserCreate } from '$lib/client/zod/schemas';
 import { callServiceInFormActions } from '$lib/client-wrapper';
+import { UserClient } from '../../lib/client-wrapper/clients';
 
 export const load = (async () => {
 	return {};
 }) satisfies PageServerLoad;
 
 export const actions: Actions = {
-	default: async ({ request }) => {
+	default: async ({ request, locals }) => {
 		const formData = await request.formData();
 
 		const validationsResult = await schema.safeParseAsync(convertFormDataToObject(formData));
@@ -24,10 +24,9 @@ export const actions: Actions = {
 		
 		return await callServiceInFormActions({
 			serviceCall: async () => {
-				await UserService.signup(validationsResult.data);
+				await UserClient({accessToken: locals.token?.access_token}).signup({userCreate: validationsResult.data});
 				throw redirect(303, '/login');
 			},
-			isTokenRequired: false,
 			errorSchema: UserCreate
 		});
 	}

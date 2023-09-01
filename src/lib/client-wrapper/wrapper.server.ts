@@ -27,7 +27,6 @@ export async function superApplyAction<TSchema extends z.AnyZodObject>(e: Servic
 
 export async function callServiceInFormActions<TPromiseReturn, TSchema extends z.AnyZodObject>({
 	serviceCall,
-	isTokenRequired = true,
 	errorSchema
 }: ServiceCallOptions<
 	TPromiseReturn,
@@ -43,7 +42,6 @@ export async function callServiceInFormActions<
 	TErrorCallbackReturn
 >({
 	serviceCall,
-	isTokenRequired = true,
 	errorSchema,
 	errorCallback
 }: RequiredProperty<
@@ -58,7 +56,6 @@ export async function callServiceInFormActions<
 	TErrorCallbackReturn
 >({
 	serviceCall,
-	isTokenRequired = true,
 	errorSchema,
 	errorCallback = async (e) => {
 		return await superApplyAction(e);
@@ -70,7 +67,6 @@ export async function callServiceInFormActions<
 >) {
 	const result = await callService({
 		serviceCall: serviceCall,
-		isTokenRequired: isTokenRequired,
 		errorSchema: errorSchema,
 		errorCallback: errorCallback
 	});
