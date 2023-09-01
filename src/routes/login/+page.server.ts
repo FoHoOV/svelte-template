@@ -27,7 +27,7 @@ export const actions: Actions = {
 			serviceCall: async () => {
 				const token = await OAuthClient({
 					accessToken: locals.token?.access_token
-				}).loginForAccessToken(validationsResult.data);
+				}).loginForAccessToken(validationsResult.data.username, validationsResult.data.password);
 				cookies.set(KEYS.token, JSON.stringify(token), { secure: true, httpOnly: true, path: '/' });
 				throw redirect(303, '/user/todos');
 			},

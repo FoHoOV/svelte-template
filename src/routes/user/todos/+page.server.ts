@@ -4,13 +4,15 @@ import { convertFormDataToObject, superFail } from '$lib/enhance/form';
 import { schema } from './validator';
 import { TodoCreate } from '$lib/client/zod/schemas';
 import { callService, callServiceInFormActions } from '$lib/client-wrapper';
-import { TodoClient } from '../../../lib/client-wrapper/clients';
+import { TodoClient } from '$lib/client-wrapper/clients';
 
 export const load = (async ({locals}) => {
 	return {
 		streamed: {
 			todos: callService({
-				serviceCall: async () => await TodoClient({accessToken: locals.token?.access_token}).getForUser()
+				serviceCall: async () => await TodoClient({accessToken: locals.token?.access_token}).getForUser({
+					status: 'all'
+				})
 			})
 		}
 	};
@@ -31,7 +33,7 @@ export const actions: Actions = {
 		return await callServiceInFormActions({
 			serviceCall: async () => {
 				return await TodoClient({accessToken: locals.token?.access_token}).createForUser({
-					todoCreate: validationsResult.data
+					...validationsResult.data
 				});
 			},
 			errorSchema: TodoCreate

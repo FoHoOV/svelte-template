@@ -24,7 +24,7 @@ export const actions: Actions = {
 		
 		return await callServiceInFormActions({
 			serviceCall: async () => {
-				await UserClient({accessToken: locals.token?.access_token}).signup({userCreate: validationsResult.data});
+				await UserClient({accessToken: locals.token?.access_token}).signup(validationsResult.data);
 				throw redirect(303, '/login');
 			},
 			errorSchema: UserCreate

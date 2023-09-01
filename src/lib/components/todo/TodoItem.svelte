@@ -16,7 +16,7 @@
 		isCallingService = true;
 		await callServiceInClient({
 			serviceCall: async () => {
-				await TodoClient($page.data.token).update({ todo: { ...todo, is_done: !todo.is_done } });
+				await TodoClient($page.data.token).update({ ...todo, is_done: !todo.is_done });
 				todos.updateTodo(todo, !todo.is_done);
 				isCallingService = false;
 			},
@@ -31,7 +31,7 @@
 		isCallingService = true;
 		await callServiceInClient({
 			serviceCall: async () => {
-				await TodoClient($page.data.token).remove({ todo });
+				await TodoClient($page.data.token).remove(todo);
 				todos.removeTodo(todo);
 				isCallingService = false;
 			},
