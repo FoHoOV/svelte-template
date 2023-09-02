@@ -3,12 +3,12 @@ import { decodeJwt, type JWTPayload } from 'jose';
 import { OAuthApi, TodoApi, UserApi } from '../client/apis';
 
 import {
+	BaseAPI,
 	Configuration,
 	type ConfigurationParameters,
 	type RequestContext
 } from '../client/runtime';
 import type { Token } from '../client/models';
-import { faLeaf } from '@fortawesome/free-solid-svg-icons';
 
 export class TokenError extends Error {
 	constructor(message: string) {
@@ -42,19 +42,15 @@ const checkAccessToken = async (context: RequestContext, config?: ConfigurationO
 
 	const headers = context.init.headers ? new Headers(context.init.headers) : new Headers();
 
-	const accessToken = headers.get('Authorization') ?? undefined;
-
-	if (!accessToken) {
+	if (!config?.token?.access_token) {
 		throw new TokenError('token required');
 	}
 
-	if (!(await isTokenExpirationDateValidAsync(accessToken))) {
+	if (!(await isTokenExpirationDateValidAsync(config.token.access_token))) {
 		throw new TokenError('token has expired');
 	}
 
-	if (accessToken) {
-		headers.set('Authorization', `${config?.token?.token_type ?? 'bearer'} ${accessToken}`);
-	}
+	headers.set('Authorization', `${config.token?.token_type ?? 'bearer'} ${config.token.access_token}`);
 
 	context.init.headers = headers;
 };
@@ -64,35 +60,24 @@ type ConfigurationOptions = Partial<Omit<ConfigurationParameters, 'accessToken'>
 	isTokenRequired?: boolean;
 };
 
-export const OAuthClient = (config: ConfigurationOptions = { isTokenRequired: true }) => {
-	return new OAuthApi(
+export const generateClient = <T extends typeof BaseAPI>(ApiClass: T, config?: ConfigurationOptions): InstanceType<T> => {
+	return new ApiClass(
 		new Configuration({
-			accessToken: config?.token?.access_token,
 			basePath: PUBLIC_API_URL
 		})
 	).withPreMiddleware(async (context) => {
 		return await checkAccessToken(context, config);
-	});
+	}) as InstanceType<T>;
+};
+
+export const OAuthClient = (config: ConfigurationOptions = { isTokenRequired: true }) => {
+	return generateClient(OAuthApi, config);
 };
 
 export const TodoClient = (config?: ConfigurationOptions) => {
-	return new TodoApi(
-		new Configuration({
-			accessToken: config?.token?.access_token,
-			basePath: PUBLIC_API_URL
-		})
-	).withPreMiddleware(async (context) => {
-		return await checkAccessToken(context, config);
-	});
+	return generateClient(TodoApi, config);
 };
 
 export const UserClient = (config?: ConfigurationOptions) => {
-	return new UserApi(
-		new Configuration({
-			accessToken: config?.token?.access_token,
-			basePath: PUBLIC_API_URL
-		})
-	).withPreMiddleware(async (context) => {
-		return await checkAccessToken(context, config);
-	});
+	return generateClient(UserApi, config);
 };
