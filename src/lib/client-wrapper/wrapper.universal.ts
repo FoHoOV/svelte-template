@@ -86,15 +86,11 @@ export const postToExternal = async <TResponse, TError = unknown>(
 	return genericPost<TResponse, TError>(`${PUBLIC_API_URL}/${endPoint}`, data, config, onError);
 };
 
-const _handleUnauthenticatedUser = async <TSchema extends z.AnyZodObject, TPromise>(
-	errorCallback: (error: ServiceError<TSchema>) => TPromise,
-	error: ServiceError<TSchema>
-): Promise<{ success: false; error: Awaited<TPromise> }> => {
-	const result = await errorCallback(error);
+export const handleUnauthenticatedUser = async () => {
 	if (browser) {
 		await invalidateAll();
 		await goto('/user/logout?session-expired=true');
-		return { success: false, error: result };
+		return;
 	} else {
 		throw redirect(303, '/user/logout?session-expired=true');
 	}
@@ -148,14 +144,17 @@ export async function callService<
 	serviceCall,
 	errorSchema,
 	errorCallback = async (e) => {
-		return e as any;
+		return e as TErrorCallbackReturn;
 	}
 }: ServiceCallOptions<TPromiseReturn, TSchema, TErrorCallbackReturn>): Promise<
 	| {
 			success: false;
 			error: TErrorCallbackReturn;
 	  }
-	| { success: true; result: Awaited<TPromiseReturn> }
+	| {
+			success: true;
+			result: Awaited<TPromiseReturn>;
+	  }
 > {
 	try {
 		return {
@@ -190,19 +189,29 @@ export async function callService<
 		}
 
 		if (e instanceof ResponseError) {
+			const response = await e.response.json();
+
 			if (e.response.status === 401) {
-				return await _handleUnauthenticatedUser(errorCallback, {
-					type: ErrorType.UNAUTHORIZED,
-					status: e.response.status,
-					message: e.message,
-					data: await e.response.json(),
-					originalError: e
-				});
+				return {
+					success: false,
+					error: await errorCallback({
+						type: ErrorType.UNAUTHORIZED,
+						status: e.response.status,
+						message: e.message,
+						data: response,
+						originalError: e
+					})
+				};
+				// return await _handleUnauthenticatedUser(errorCallback, {
+				// 	type: ErrorType.UNAUTHORIZED,
+				// 	status: e.response.status,
+				// 	message: e.message,
+				// 	data: response,
+				// 	originalError: e
+				// });
 			}
-			const parsedApiError = await errorSchema
-				?.strip()
-				.partial()
-				.safeParseAsync((await e.response.json()).detail);
+
+			const parsedApiError = await errorSchema?.strip().partial().safeParseAsync(response.detail);
 			if (parsedApiError?.success) {
 				return {
 					success: false,
@@ -218,13 +227,23 @@ export async function callService<
 		}
 
 		if (e instanceof TokenError) {
-			return await _handleUnauthenticatedUser(errorCallback, {
-				type: ErrorType.UNAUTHORIZED,
-				status: -1,
-				message: e.message,
-				data: { detail: 'Invalid (client-side validations).' },
-				originalError: e
-			});
+			return {
+				success: false,
+				error: await errorCallback({
+					type: ErrorType.UNAUTHORIZED,
+					status: -1,
+					message: e.message,
+					data: { detail: 'Invalid token (client-side validations).' },
+					originalError: e
+				})
+			};
+			// return await _handleUnauthenticatedUser(errorCallback, {
+			// 	type: ErrorType.UNAUTHORIZED,
+			// 	status: -1,
+			// 	message: e.message,
+			// 	data: { detail: 'Invalid token (client-side validations).' },
+			// 	originalError: e
+			// });
 		}
 
 		return {

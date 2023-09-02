@@ -33,7 +33,7 @@ export const actions: Actions = {
 			},
 			errorCallback: async (e) => {
 				if (e.type === ErrorType.UNAUTHORIZED) {
-					return superFail(403, {
+					return superFail(401, {
 						message: (e.data as any).detail as string
 					});
 				}

@@ -1,8 +1,8 @@
 import type { z } from 'zod';
-import { redirect } from '@sveltejs/kit';
 import {
 	callService,
 	ErrorType,
+	handleUnauthenticatedUser,
 	type ServiceCallOptions,
 	type ServiceError
 } from './wrapper.universal';
@@ -19,7 +19,7 @@ export async function superApplyAction<TSchema extends z.AnyZodObject>(e: Servic
 		case ErrorType.VALIDATION_ERROR:
 			return superFail(400, { message: e.message, error: e.data });
 		case ErrorType.UNAUTHORIZED:
-			throw redirect(303, '/login');
+			return await handleUnauthenticatedUser();
 		default:
 			throw e.originalError;
 	}
