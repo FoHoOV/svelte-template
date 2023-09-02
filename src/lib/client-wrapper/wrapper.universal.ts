@@ -144,6 +144,9 @@ export async function callService<
 	serviceCall,
 	errorSchema,
 	errorCallback = async (e) => {
+		if (e.type === ErrorType.UNAUTHORIZED) {
+			await handleUnauthenticatedUser();
+		}
 		return e as TErrorCallbackReturn;
 	}
 }: ServiceCallOptions<TPromiseReturn, TSchema, TErrorCallbackReturn>): Promise<
@@ -202,6 +205,8 @@ export async function callService<
 						originalError: e
 					})
 				};
+
+				// this solution redirected to logout page no matter what the consumer did
 				// return await _handleUnauthenticatedUser(errorCallback, {
 				// 	type: ErrorType.UNAUTHORIZED,
 				// 	status: e.response.status,
@@ -237,6 +242,8 @@ export async function callService<
 					originalError: e
 				})
 			};
+
+			// this solution redirected to logout page no matter what the consumer did
 			// return await _handleUnauthenticatedUser(errorCallback, {
 			// 	type: ErrorType.UNAUTHORIZED,
 			// 	status: -1,
