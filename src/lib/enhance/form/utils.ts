@@ -37,7 +37,7 @@ export function failedActionData<T>({ message, error }: FailedActionProps<T>) {
 }
 
 export function superFail<T = never>(
-	status: NumberRange<400, 600>,
+	status: NumberRange<400, 500>,
 	{ message, error }: FailedActionProps<T>
 ) {
 	return fail(status, failedActionData({ message, error }));

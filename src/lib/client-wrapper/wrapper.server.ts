@@ -10,25 +10,20 @@ import { superFail } from '$lib/enhance';
 import type { RequiredProperty } from '../utils';
 
 export async function superApplyAction<TSchema extends z.AnyZodObject>(e: ServiceError<TSchema>) {
-	return superFail(404, {
-		message: e.message,
-		error: e.data as never
-	});
-	// 	switch (e.type) {
-// 		case ErrorType.API_ERROR:
-// 			return superFail(404, {
-// 				message: e.message,
-// 				error: e.data as never
-// 			});
-// 		case ErrorType.VALIDATION_ERROR:
-// 			return superFail(400, { message: e.message, error: e.data });
-// 		case ErrorType.UNAUTHORIZED:
-// 			return await handleUnauthenticatedUser();
-// 		default:
-// 			throw e.originalError;
-// 	}
+	switch (e.type) {
+		case ErrorType.API_ERROR:
+			return superFail(404, {
+				message: e.message,
+				error: e.data as never
+			});
+		case ErrorType.VALIDATION_ERROR:
+			return superFail(400, { message: e.message, error: e.data });
+		case ErrorType.UNAUTHORIZED:
+			return await handleUnauthenticatedUser();
+		default:
+			throw e.originalError;
+	}
 }
-
 
 export async function callServiceInFormActions<TPromiseReturn, TSchema extends z.AnyZodObject>({
 	serviceCall,
@@ -38,7 +33,7 @@ export async function callServiceInFormActions<TPromiseReturn, TSchema extends z
 	TSchema,
 	Awaited<ReturnType<typeof superApplyAction<TSchema>>>
 >): Promise<
-	| { success: true; result: Awaited<TPromiseReturn>; error: undefined }
+	| { success: true; result: Awaited<TPromiseReturn>; error: never }
 	| Awaited<ReturnType<typeof superApplyAction<TSchema>>>
 >;
 export async function callServiceInFormActions<
@@ -53,7 +48,7 @@ export async function callServiceInFormActions<
 	ServiceCallOptions<TPromiseReturn, TSchema, TErrorCallbackReturn>,
 	'errorCallback'
 >): Promise<
-	{ success: true; result: Awaited<TPromiseReturn>; error: undefined } | TErrorCallbackReturn
+	{ success: true; result: Awaited<TPromiseReturn>; error: never } | TErrorCallbackReturn
 >;
 export async function callServiceInFormActions<
 	TPromiseReturn,
