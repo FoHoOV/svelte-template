@@ -34,11 +34,12 @@ export const actions: Actions = {
 			errorCallback: async (e) => {
 				if (e.type === ErrorType.UNAUTHORIZED) {
 					e.preventDefaultHandler = true;
-					return superFail(401, {
+					return superFail(400, {
 						message: (e.data as any).detail as string
 					});
 				}
-				return await superApplyAction(e);
+				// ts couldn't infer the e type here! and I have no idea why? >_<    
+				return await superApplyAction<typeof Body_login_for_access_token>(e);
 			},
 			errorSchema: Body_login_for_access_token
 		});
