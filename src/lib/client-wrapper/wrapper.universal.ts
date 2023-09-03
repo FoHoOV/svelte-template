@@ -1,7 +1,7 @@
 import { browser } from '$app/environment';
 import { goto, invalidateAll } from '$app/navigation';
 import { PUBLIC_API_URL } from '$env/static/public';
-import { redirect } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 import type { z } from 'zod';
 import type { ErrorMessage } from '$lib/utils/types';
 import { RequiredError, FetchError, ResponseError } from '../client/runtime';
@@ -96,6 +96,25 @@ export const handleUnauthenticatedUser = async () => {
 	}
 };
 
+const _defaultUnAuthenticatedUserHandler = async <
+	TSchema extends z.AnyZodObject,
+	TErrorCallbackReturn
+>(
+	errorCallback: Required<
+		ServiceCallOptions<never, TSchema, TErrorCallbackReturn>
+	>['errorCallback'],
+	e: Extract<ServiceError<TSchema>, { type: ErrorType.UNAUTHORIZED }>
+): Promise<{
+	success: false;
+	error: TErrorCallbackReturn;
+}> => {
+	const result = await errorCallback(e);
+	if (e.preventDefaultHandler) {
+		return { success: false, error: result };
+	}
+	return { success: false, error: (await handleUnauthenticatedUser()) as TErrorCallbackReturn };
+};
+
 export enum ErrorType {
 	VALIDATION_ERROR,
 	API_ERROR,
@@ -119,11 +138,19 @@ export type ServiceError<TSchema extends z.AnyZodObject> =
 			originalError: ResponseError | RequiredError | FetchError;
 	  }
 	| {
-			type: ErrorType.UNKNOWN_ERROR | ErrorType.UNAUTHORIZED;
+			type: ErrorType.UNKNOWN_ERROR;
 			message: ErrorMessage;
 			status: number;
 			data: unknown;
 			originalError: unknown;
+	  }
+	| {
+			type: ErrorType.UNAUTHORIZED;
+			message: ErrorMessage;
+			status: number;
+			data: unknown;
+			preventDefaultHandler: boolean;
+			originalError: ResponseError | TokenError;
 	  };
 
 export type ServiceCallOptions<
@@ -192,19 +219,17 @@ export async function callService<
 		}
 
 		if (e instanceof ResponseError) {
-			const response = await e.response.json();
+			const response = await e.response.clone().json();
 
 			if (e.response.status === 401) {
-				return {
-					success: false,
-					error: await errorCallback({
-						type: ErrorType.UNAUTHORIZED,
-						status: e.response.status,
-						message: e.message,
-						data: response,
-						originalError: e
-					})
-				};
+				await _defaultUnAuthenticatedUserHandler(errorCallback, {
+					type: ErrorType.UNAUTHORIZED,
+					status: e.response.status,
+					message: e.message,
+					data: response,
+					preventDefaultHandler: false,
+					originalError: e
+				});
 
 				// this solution redirected to logout page no matter what the consumer did
 				// return await _handleUnauthenticatedUser(errorCallback, {
@@ -232,16 +257,14 @@ export async function callService<
 		}
 
 		if (e instanceof TokenError) {
-			return {
-				success: false,
-				error: await errorCallback({
-					type: ErrorType.UNAUTHORIZED,
-					status: -1,
-					message: e.message,
-					data: { detail: 'Invalid token (client-side validations).' },
-					originalError: e
-				})
-			};
+			return await _defaultUnAuthenticatedUserHandler(errorCallback, {
+				type: ErrorType.UNAUTHORIZED,
+				status: -1,
+				message: e.message,
+				data: { detail: 'Invalid token (client-side validations).' },
+				preventDefaultHandler: false,
+				originalError: e
+			});
 
 			// this solution redirected to logout page no matter what the consumer did
 			// return await _handleUnauthenticatedUser(errorCallback, {

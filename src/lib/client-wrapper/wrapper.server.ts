@@ -10,20 +10,25 @@ import { superFail } from '$lib/enhance';
 import type { RequiredProperty } from '../utils';
 
 export async function superApplyAction<TSchema extends z.AnyZodObject>(e: ServiceError<TSchema>) {
-	switch (e.type) {
-		case ErrorType.API_ERROR:
-			return superFail(404, {
-				message: e.message,
-				error: e.data as never
-			});
-		case ErrorType.VALIDATION_ERROR:
-			return superFail(400, { message: e.message, error: e.data });
-		case ErrorType.UNAUTHORIZED:
-			return await handleUnauthenticatedUser();
-		default:
-			throw e.originalError;
-	}
+	return superFail(404, {
+		message: e.message,
+		error: e.data as never
+	});
+	// 	switch (e.type) {
+// 		case ErrorType.API_ERROR:
+// 			return superFail(404, {
+// 				message: e.message,
+// 				error: e.data as never
+// 			});
+// 		case ErrorType.VALIDATION_ERROR:
+// 			return superFail(400, { message: e.message, error: e.data });
+// 		case ErrorType.UNAUTHORIZED:
+// 			return await handleUnauthenticatedUser();
+// 		default:
+// 			throw e.originalError;
+// 	}
 }
+
 
 export async function callServiceInFormActions<TPromiseReturn, TSchema extends z.AnyZodObject>({
 	serviceCall,

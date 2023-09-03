@@ -24,9 +24,9 @@ export function getFormErrors<
 	return { errors: form?.error, message: form?.message };
 }
 
-export function failedActionData({ message }: FailedActionProps<undefined>): {
+export function failedActionData({ message }: FailedActionProps<never>): {
 	message: ErrorMessage;
-	error: undefined;
+	error: never;
 };
 export function failedActionData<T>({ message, error }: FailedActionProps<T>): {
 	message: ErrorMessage;
@@ -36,7 +36,7 @@ export function failedActionData<T>({ message, error }: FailedActionProps<T>) {
 	return { message, error };
 }
 
-export function superFail<T = undefined>(
+export function superFail<T = never>(
 	status: NumberRange<400, 600>,
 	{ message, error }: FailedActionProps<T>
 ) {
