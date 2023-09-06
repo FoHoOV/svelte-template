@@ -27,14 +27,14 @@ export const postToSvelte = async <TResponse, TError = unknown>(
 };
 
 export async function callServiceInClient<
-	TPromiseReturn,
-	TSchema extends z.AnyZodObject,
-	TErrorCallbackReturn = ServiceError<TSchema>
+TServiceCallResult extends Promise<unknown>,
+TSchema extends z.AnyZodObject,
+TResolvedErrorCallbackResult = ServiceError<TSchema>
 >({
 	serviceCall,
 	errorSchema,
 	errorCallback
-}: ServiceCallOptions<TPromiseReturn, TSchema, TErrorCallbackReturn>) {
+}: ServiceCallOptions<TServiceCallResult, TSchema, TResolvedErrorCallbackResult>) {
 	return await callService({
 		serviceCall: serviceCall,
 		errorSchema: errorSchema,

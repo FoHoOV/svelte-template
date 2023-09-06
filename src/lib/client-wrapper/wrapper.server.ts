@@ -25,35 +25,39 @@ export async function superApplyAction<TSchema extends z.AnyZodObject>(e: Servic
 	}
 }
 
-export async function callServiceInFormActions<TPromiseReturn, TSchema extends z.AnyZodObject>({
+export async function callServiceInFormActions<
+	TServiceCallResult extends Promise<unknown>,
+	TSchema extends z.AnyZodObject
+>({
 	serviceCall,
 	errorSchema
 }: ServiceCallOptions<
-	TPromiseReturn,
+	TServiceCallResult,
 	TSchema,
 	Awaited<ReturnType<typeof superApplyAction<TSchema>>>
 >): Promise<
-	| { success: true; result: Awaited<TPromiseReturn>; error: never }
+	| { success: true; result: Awaited<TServiceCallResult>; error: never }
 	| Awaited<ReturnType<typeof superApplyAction<TSchema>>>
 >;
 export async function callServiceInFormActions<
-	TPromiseReturn,
+	TServiceCallResult extends Promise<unknown>,
 	TSchema extends z.AnyZodObject,
-	TErrorCallbackReturn
+	TResolvedErrorCallbackResult
 >({
 	serviceCall,
 	errorSchema,
 	errorCallback
 }: RequiredProperty<
-	ServiceCallOptions<TPromiseReturn, TSchema, TErrorCallbackReturn>,
+	ServiceCallOptions<TServiceCallResult, TSchema, TResolvedErrorCallbackResult>,
 	'errorCallback'
 >): Promise<
-	{ success: true; result: Awaited<TPromiseReturn>; error: never } | TErrorCallbackReturn
+	| { success: true; result: Awaited<TServiceCallResult>; error: never }
+	| TResolvedErrorCallbackResult
 >;
 export async function callServiceInFormActions<
-	TPromiseReturn,
+	TServiceCallResult extends Promise<unknown>,
 	TSchema extends z.AnyZodObject,
-	TErrorCallbackReturn
+	TResolvedErrorCallbackResult
 >({
 	serviceCall,
 	errorSchema,
@@ -61,9 +65,9 @@ export async function callServiceInFormActions<
 		return await superApplyAction(e);
 	}
 }: ServiceCallOptions<
-	TPromiseReturn,
+	TServiceCallResult,
 	TSchema,
-	TErrorCallbackReturn | Awaited<ReturnType<typeof superApplyAction<TSchema>>>
+	TResolvedErrorCallbackResult | Awaited<ReturnType<typeof superApplyAction<TSchema>>>
 >) {
 	const result = await callService({
 		serviceCall: serviceCall,

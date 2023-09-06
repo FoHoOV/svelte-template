@@ -154,19 +154,19 @@ export type ServiceError<TSchema extends z.AnyZodObject> =
 	  };
 
 export type ServiceCallOptions<
-	TPromiseReturn,
+	TServiceCallResult extends Promise<unknown>,
 	TSchema extends z.AnyZodObject,
-	TErrorCallbackReturn
+	TResolvedErrorCallbackResult
 > = {
-	serviceCall: () => Promise<TPromiseReturn>;
+	serviceCall: () => TServiceCallResult;
 	errorSchema?: TSchema;
-	errorCallback?: (e: ServiceError<TSchema>) => Promise<TErrorCallbackReturn>;
+	errorCallback?: (e: ServiceError<TSchema>) => Promise<TResolvedErrorCallbackResult>;
 };
 
 export async function callService<
-	TPromiseReturn,
+	TServiceCallResult extends Promise<unknown>,
 	TSchema extends z.AnyZodObject,
-	TErrorCallbackReturn = ServiceError<TSchema>
+	TResolvedErrorCallbackResult = ServiceError<TSchema>
 >({
 	serviceCall,
 	errorSchema,
@@ -174,16 +174,16 @@ export async function callService<
 		if (e.type === ErrorType.UNAUTHORIZED) {
 			await handleUnauthenticatedUser();
 		}
-		return e as TErrorCallbackReturn;
+		return e as TResolvedErrorCallbackResult;
 	}
-}: ServiceCallOptions<TPromiseReturn, TSchema, TErrorCallbackReturn>): Promise<
+}: ServiceCallOptions<TServiceCallResult, TSchema, TResolvedErrorCallbackResult>): Promise<
 	| {
 			success: false;
-			error: TErrorCallbackReturn;
+			error: TResolvedErrorCallbackResult;
 	  }
 	| {
 			success: true;
-			result: Awaited<TPromiseReturn>;
+			result: Awaited<TServiceCallResult>;
 	  }
 > {
 	try {
