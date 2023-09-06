@@ -2,7 +2,7 @@ import type { ActionReturn } from 'svelte/action';
 import type { SubmitFunction } from '@sveltejs/kit';
 import { enhance } from '$app/forms';
 
-import type { z, ZodType } from 'zod';
+import type { z } from 'zod';
 import { validate, type ValidatorErrorEvent, type ValidatorOptions } from './validator';
 
 export type EnhanceOptions<TActionData = unknown> = {
@@ -11,7 +11,7 @@ export type EnhanceOptions<TActionData = unknown> = {
 };
 
 export type SubmitEvents<
-	TSchema extends ZodType,
+	TSchema extends z.ZodTypeAny,
 	TActionData extends { result?: TResult } | undefined | null = any,
 	TResult = unknown
 > = {
@@ -26,7 +26,7 @@ export type SubmitEvents<
 };
 
 export function superEnhance<
-	TSchema extends ZodType,
+	TSchema extends z.ZodTypeAny,
 	TActionData extends { result?: TResult } | undefined | null = any,
 	TResult = unknown
 >(
@@ -34,7 +34,7 @@ export function superEnhance<
 	options?: Partial<EnhanceOptions<TActionData>>
 ): ActionReturn<ValidatorOptions<TSchema>, SubmitEvents<TSchema, TActionData>>;
 export function superEnhance<
-	TSchema extends ZodType,
+	TSchema extends z.ZodTypeAny,
 	TActionData extends { result?: TResult } | undefined | null = any,
 	TResult = unknown
 >(
@@ -45,7 +45,7 @@ export function superEnhance<
 	ValidatorErrorEvent<TSchema> & SubmitEvents<TSchema, TActionData>
 >;
 export function superEnhance<
-	TSchema extends ZodType,
+	TSchema extends z.ZodTypeAny,
 	TActionData extends { result?: TResult } | undefined | null = any,
 	TResult = unknown
 >(

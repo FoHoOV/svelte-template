@@ -1,18 +1,18 @@
 import type { ActionReturn } from 'svelte/action';
-import type { z, ZodType } from 'zod';
+import type { z } from 'zod';
 import { convertFormDataToObject } from './utils';
 
-export type ValidatorErrorsType<T extends ZodType> = z.typeToFlattenedError<z.infer<T>>['fieldErrors'];
+export type ValidatorErrorsType<T extends z.ZodTypeAny> = z.typeToFlattenedError<z.infer<T>>['fieldErrors'];
 
-export type ValidatorOptions<TSchema extends ZodType> = {
+export type ValidatorOptions<TSchema extends z.ZodTypeAny> = {
 	schema: TSchema;
 };
 
-export type ValidatorErrorEvent<TSchema extends ZodType> = {
+export type ValidatorErrorEvent<TSchema extends z.ZodTypeAny> = {
 	'on:submitclienterror': (e: CustomEvent<ValidatorErrorsType<TSchema>>) => void;
 };
 
-export function validate<TSchema extends ZodType>(
+export function validate<TSchema extends z.ZodTypeAny>(
 	node: HTMLFormElement,
 	options: ValidatorOptions<TSchema>
 ): ActionReturn<ValidatorOptions<TSchema>, ValidatorErrorEvent<TSchema>> {
@@ -42,9 +42,9 @@ export function validate<TSchema extends ZodType>(
 }
 
 
-export async function getClientSideFormErrors<TSchema extends ZodType>(
+export async function getClientSideFormErrors<TSchema extends z.ZodTypeAny>(
 	formData: FormData,
-	zodObject: ZodType
+	zodObject: z.ZodTypeAny
 ): Promise<ValidatorErrorsType<TSchema>> {
 	const validationsResult = await zodObject.safeParseAsync(convertFormDataToObject(formData));
 	if (validationsResult.success) {
