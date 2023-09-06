@@ -16,10 +16,10 @@ export async function superApplyAction<TErrorSchema extends z.AnyZodObject>(
 		case ErrorType.API_ERROR:
 			return superFail(404, {
 				message: e.message,
-				error: e.data as never
+				error: e.response as never
 			});
 		case ErrorType.VALIDATION_ERROR:
-			return superFail(400, { message: e.message, error: e.data });
+			return superFail(400, { message: e.message, error: e.validationError });
 		case ErrorType.UNAUTHORIZED:
 			return await handleUnauthenticatedUser();
 		default:

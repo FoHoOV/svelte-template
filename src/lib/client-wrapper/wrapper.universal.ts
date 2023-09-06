@@ -131,14 +131,15 @@ export type ServiceError<TErrorSchema extends z.AnyZodObject> =
 			type: ErrorType.VALIDATION_ERROR;
 			message: ErrorMessage;
 			status: number;
-			data: TErrorSchema extends z.AnyZodObject ? z.infer<TErrorSchema> : never;
-			originalError: ResponseError | RequiredError;
+			validationError: TErrorSchema extends z.AnyZodObject ? z.infer<TErrorSchema> : never;
+			response: Record<string, any>;
+			originalError: ResponseError;
 	  }
 	| {
 			type: ErrorType.API_ERROR;
 			message: ErrorMessage;
 			status: number;
-			data: unknown;
+			response: Record<string, any>;
 			originalError: ResponseError;
 	  }
 	| {
@@ -152,7 +153,6 @@ export type ServiceError<TErrorSchema extends z.AnyZodObject> =
 			type: ErrorType.UNKNOWN_ERROR;
 			message: ErrorMessage;
 			status: number;
-			data: unknown;
 			originalError: unknown;
 	  }
 	| {
@@ -253,7 +253,8 @@ export async function callService<
 						type: ErrorType.VALIDATION_ERROR,
 						status: e.response.status,
 						message: e.message,
-						data: parsedApiError.data as any,
+						response: response,
+						validationError: parsedApiError.data as any,
 						originalError: e
 					})
 				};
@@ -265,7 +266,7 @@ export async function callService<
 					type: ErrorType.API_ERROR,
 					status: e.response.status,
 					message: e.message,
-					data: response,
+					response: response,
 					originalError: e
 				})
 			};
@@ -288,7 +289,6 @@ export async function callService<
 				type: ErrorType.UNKNOWN_ERROR,
 				status: -1,
 				message: 'An unknown error has occurred, please try again',
-				data: e,
 				originalError: e
 			})
 		};
