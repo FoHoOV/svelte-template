@@ -9,7 +9,7 @@ import {
 import { superFail } from '$lib/enhance';
 import type { RequiredProperty } from '../utils';
 
-export async function superApplyAction<TSchema extends z.AnyZodObject>(e: ServiceError<TSchema>) {
+export async function superApplyAction<TErrorSchema extends z.AnyZodObject>(e: ServiceError<TErrorSchema>) {
 	switch (e.type) {
 		case ErrorType.API_ERROR:
 			return superFail(404, {
@@ -27,37 +27,36 @@ export async function superApplyAction<TSchema extends z.AnyZodObject>(e: Servic
 
 export async function callServiceInFormActions<
 	TServiceCallResult extends Promise<unknown>,
-	TSchema extends z.AnyZodObject
+	TErrorSchema extends z.AnyZodObject
 >({
 	serviceCall,
 	errorSchema
 }: ServiceCallOptions<
 	TServiceCallResult,
-	TSchema,
-	Awaited<ReturnType<typeof superApplyAction<TSchema>>>
+	TErrorSchema,
+	ReturnType<typeof superApplyAction<TErrorSchema>>
 >): Promise<
 	| { success: true; result: Awaited<TServiceCallResult>; error: never }
-	| Awaited<ReturnType<typeof superApplyAction<TSchema>>>
+	| Awaited<ReturnType<typeof superApplyAction<TErrorSchema>>>
 >;
 export async function callServiceInFormActions<
 	TServiceCallResult extends Promise<unknown>,
-	TSchema extends z.AnyZodObject,
-	TResolvedErrorCallbackResult
+	TErrorSchema extends z.AnyZodObject,
+	TErrorCallbackResult extends Promise<unknown>
 >({
 	serviceCall,
 	errorSchema,
 	errorCallback
 }: RequiredProperty<
-	ServiceCallOptions<TServiceCallResult, TSchema, TResolvedErrorCallbackResult>,
+	ServiceCallOptions<TServiceCallResult, TErrorSchema, TErrorCallbackResult>,
 	'errorCallback'
 >): Promise<
-	| { success: true; result: Awaited<TServiceCallResult>; error: never }
-	| TResolvedErrorCallbackResult
+	{ success: true; result: Awaited<TServiceCallResult>; error: never } | TErrorCallbackResult
 >;
 export async function callServiceInFormActions<
 	TServiceCallResult extends Promise<unknown>,
-	TSchema extends z.AnyZodObject,
-	TResolvedErrorCallbackResult
+	TErrorSchema extends z.AnyZodObject,
+	TErrorCallbackResult extends Promise<unknown>
 >({
 	serviceCall,
 	errorSchema,
@@ -66,8 +65,8 @@ export async function callServiceInFormActions<
 	}
 }: ServiceCallOptions<
 	TServiceCallResult,
-	TSchema,
-	TResolvedErrorCallbackResult | Awaited<ReturnType<typeof superApplyAction<TSchema>>>
+	TErrorSchema,
+	TErrorCallbackResult | ReturnType<typeof superApplyAction<TErrorSchema>>
 >) {
 	const result = await callService({
 		serviceCall: serviceCall,
