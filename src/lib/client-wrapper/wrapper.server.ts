@@ -9,7 +9,9 @@ import {
 import { superFail } from '$lib/enhance';
 import type { RequiredProperty } from '../utils';
 
-export async function superApplyAction<TErrorSchema extends z.AnyZodObject>(e: ServiceError<TErrorSchema>) {
+export async function superApplyAction<TErrorSchema extends z.AnyZodObject>(
+	e: ServiceError<TErrorSchema>
+) {
 	switch (e.type) {
 		case ErrorType.API_ERROR:
 			return superFail(404, {

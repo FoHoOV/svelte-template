@@ -112,12 +112,16 @@ const _defaultUnAuthenticatedUserHandler = async <
 	if (e.preventDefaultHandler) {
 		return { success: false, error: result };
 	}
-	return { success: false, error: (await handleUnauthenticatedUser()) as Awaited<TErrorCallbackResult> };
+	return {
+		success: false,
+		error: (await handleUnauthenticatedUser()) as Awaited<TErrorCallbackResult>
+	};
 };
 
 export enum ErrorType {
 	VALIDATION_ERROR,
 	API_ERROR,
+	PRE_REQUEST_FAILURE,
 	UNKNOWN_ERROR,
 	UNAUTHORIZED
 }
@@ -127,15 +131,22 @@ export type ServiceError<TErrorSchema extends z.AnyZodObject> =
 			type: ErrorType.VALIDATION_ERROR;
 			message: ErrorMessage;
 			status: number;
-			data: z.infer<TErrorSchema>;
-			originalError: ResponseError | RequiredError | FetchError;
+			data: TErrorSchema extends z.AnyZodObject ? z.infer<TErrorSchema> : never;
+			originalError: ResponseError | RequiredError;
 	  }
 	| {
 			type: ErrorType.API_ERROR;
 			message: ErrorMessage;
 			status: number;
 			data: unknown;
-			originalError: ResponseError | RequiredError | FetchError;
+			originalError: ResponseError;
+	  }
+	| {
+			type: ErrorType.PRE_REQUEST_FAILURE;
+			message: ErrorMessage;
+			status: -1;
+			data: unknown;
+			originalError: FetchError | RequiredError;
 	  }
 	| {
 			type: ErrorType.UNKNOWN_ERROR;
@@ -175,7 +186,9 @@ export async function callService<
 			await handleUnauthenticatedUser();
 		}
 		return e;
-	}) as Required<ServiceCallOptions<TServiceCallResult, TErrorSchema, TErrorCallbackResult>>['errorCallback']
+	}) as Required<
+		ServiceCallOptions<TServiceCallResult, TErrorSchema, TErrorCallbackResult>
+	>['errorCallback']
 }: ServiceCallOptions<TServiceCallResult, TErrorSchema, TErrorCallbackResult>): Promise<
 	| {
 			success: false;
@@ -196,7 +209,7 @@ export async function callService<
 			return {
 				success: false,
 				error: await errorCallback({
-					type: ErrorType.API_ERROR,
+					type: ErrorType.PRE_REQUEST_FAILURE,
 					status: -1,
 					message: 'An unknown error has occurred, please try again',
 					data: e,
@@ -209,7 +222,7 @@ export async function callService<
 			return {
 				success: false,
 				error: await errorCallback({
-					type: ErrorType.API_ERROR,
+					type: ErrorType.PRE_REQUEST_FAILURE,
 					status: -1,
 					message: e.message,
 					data: e,
@@ -230,15 +243,6 @@ export async function callService<
 					preventDefaultHandler: false,
 					originalError: e
 				});
-
-				// this solution redirected to logout page no matter what the consumer did
-				// return await _handleUnauthenticatedUser(errorCallback, {
-				// 	type: ErrorType.UNAUTHORIZED,
-				// 	status: e.response.status,
-				// 	message: e.message,
-				// 	data: response,
-				// 	originalError: e
-				// });
 			}
 
 			const parsedApiError = await errorSchema?.strip().partial().safeParseAsync(response.detail);
@@ -249,11 +253,22 @@ export async function callService<
 						type: ErrorType.VALIDATION_ERROR,
 						status: e.response.status,
 						message: e.message,
-						data: parsedApiError.data,
+						data: parsedApiError.data as any,
 						originalError: e
 					})
 				};
 			}
+
+			return {
+				success: false,
+				error: await errorCallback({
+					type: ErrorType.API_ERROR,
+					status: e.response.status,
+					message: e.message,
+					data: response,
+					originalError: e
+				})
+			};
 		}
 
 		if (e instanceof TokenError) {
@@ -265,15 +280,6 @@ export async function callService<
 				preventDefaultHandler: false,
 				originalError: e
 			});
-
-			// this solution redirected to logout page no matter what the consumer did
-			// return await _handleUnauthenticatedUser(errorCallback, {
-			// 	type: ErrorType.UNAUTHORIZED,
-			// 	status: -1,
-			// 	message: e.message,
-			// 	data: { detail: 'Invalid token (client-side validations).' },
-			// 	originalError: e
-			// });
 		}
 
 		return {

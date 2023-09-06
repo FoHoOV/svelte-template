@@ -7,6 +7,7 @@ import { Body_login_for_access_token } from '$lib/client/zod/schemas';
 import { superApplyAction, callServiceInFormActions } from '$lib/client-wrapper';
 import { ErrorType } from '$lib/client-wrapper/wrapper.universal';
 import { OAuthClient } from '$lib/client-wrapper/clients';
+import { ValidationError } from '../../lib/client/zod/schemas';
 
 export const load = (async () => {
 	return {};
@@ -37,6 +38,10 @@ export const actions: Actions = {
 					return superFail(400, {
 						message: (e.data as any).detail as string
 					});
+				}
+				if(e.type === ErrorType.VALIDATION_ERROR){
+					e.data.client_id
+					//       ^?
 				}
 				// ts couldn't infer the e type here! and I have no idea why? >_<    
 				return await superApplyAction<typeof Body_login_for_access_token>(e);
