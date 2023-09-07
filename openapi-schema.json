@@ -1,0 +1,409 @@
+{
+	"openapi": "3.0.0",
+	"info": { "title": "FastAPI", "version": "0.1.0" },
+	"paths": {
+		"/oauth/token": {
+			"post": {
+				"tags": ["OAuth"],
+				"summary": "Login For Access Token",
+				"operationId": "login_for_access_token",
+				"requestBody": {
+					"content": {
+						"application/x-www-form-urlencoded": {
+							"schema": { "$ref": "#/components/schemas/Body_login_for_access_token" }
+						}
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": { "schema": { "$ref": "#/components/schemas/Token" } }
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/user/signup": {
+			"post": {
+				"tags": ["user"],
+				"summary": "Signup",
+				"operationId": "signup",
+				"requestBody": {
+					"content": {
+						"application/json": { "schema": { "$ref": "#/components/schemas/UserCreate" } }
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } }
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/user/list-all": {
+			"get": {
+				"tags": ["user"],
+				"summary": "List All",
+				"operationId": "list_all",
+				"parameters": [
+					{
+						"name": "skip",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "integer", "default": 0, "title": "Skip" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "integer", "default": 100, "title": "Limit" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": { "$ref": "#/components/schemas/User" },
+									"title": "Response List All"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/user/info": {
+			"get": {
+				"tags": ["user"],
+				"summary": "Info",
+				"operationId": "info",
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": { "application/json": { "schema": { "$ref": "#/components/schemas/User" } } }
+					}
+				},
+				"security": [{ "OAuth2PasswordBearer": [] }]
+			}
+		},
+		"/todo/create": {
+			"post": {
+				"tags": ["todo"],
+				"summary": "Create For User",
+				"operationId": "create_for_user",
+				"requestBody": {
+					"content": {
+						"application/json": { "schema": { "$ref": "#/components/schemas/TodoCreate" } }
+					},
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": { "application/json": { "schema": { "$ref": "#/components/schemas/Todo" } } }
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+							}
+						}
+					}
+				},
+				"security": [{ "OAuth2PasswordBearer": [] }]
+			}
+		},
+		"/todo/update": {
+			"patch": {
+				"tags": ["todo"],
+				"summary": "Update",
+				"operationId": "update",
+				"requestBody": {
+					"content": { "application/json": { "schema": { "$ref": "#/components/schemas/Todo" } } },
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": { "application/json": { "schema": { "$ref": "#/components/schemas/Todo" } } }
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+							}
+						}
+					}
+				},
+				"security": [{ "OAuth2PasswordBearer": [] }]
+			}
+		},
+		"/todo/remove": {
+			"delete": {
+				"tags": ["todo"],
+				"summary": "Remove",
+				"operationId": "remove",
+				"requestBody": {
+					"content": { "application/json": { "schema": { "$ref": "#/components/schemas/Todo" } } },
+					"required": true
+				},
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": { "application/json": { "schema": {} } }
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+							}
+						}
+					}
+				},
+				"security": [{ "OAuth2PasswordBearer": [] }]
+			}
+		},
+		"/todo/list": {
+			"get": {
+				"tags": ["todo"],
+				"summary": "Get For User",
+				"operationId": "get_for_user",
+				"security": [{ "OAuth2PasswordBearer": [] }],
+				"parameters": [
+					{
+						"name": "status",
+						"in": "query",
+						"required": false,
+						"schema": {
+							"allOf": [{ "$ref": "#/components/schemas/SearchTodoStatus" }],
+							"default": "all",
+							"title": "Status"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": { "$ref": "#/components/schemas/Todo" },
+									"title": "Response Get For User"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+							}
+						}
+					}
+				}
+			}
+		},
+		"/todo/all-users": {
+			"get": {
+				"tags": ["todo"],
+				"summary": "Get All",
+				"operationId": "get_all",
+				"parameters": [
+					{
+						"name": "skip",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "integer", "default": 0, "title": "Skip" }
+					},
+					{
+						"name": "limit",
+						"in": "query",
+						"required": false,
+						"schema": { "type": "integer", "default": 100, "title": "Limit" }
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "Successful Response",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "array",
+									"items": { "$ref": "#/components/schemas/Todo" },
+									"title": "Response Get All"
+								}
+							}
+						}
+					},
+					"422": {
+						"description": "Validation Error",
+						"content": {
+							"application/json": {
+								"schema": { "$ref": "#/components/schemas/HTTPValidationError" }
+							}
+						}
+					}
+				}
+			}
+		}
+	},
+	"components": {
+		"schemas": {
+			"Body_login_for_access_token": {
+				"properties": {
+					"grant_type": {
+						"anyOf": [{ "type": "string", "pattern": "password" }, { "type": "null" }],
+						"title": "Grant Type"
+					},
+					"username": { "type": "string", "title": "Username" },
+					"password": { "type": "string", "title": "Password" },
+					"scope": { "type": "string", "title": "Scope", "default": "" },
+					"client_id": {
+						"anyOf": [{ "type": "string" }, { "type": "null" }],
+						"title": "Client Id"
+					},
+					"client_secret": {
+						"anyOf": [{ "type": "string" }, { "type": "null" }],
+						"title": "Client Secret"
+					}
+				},
+				"type": "object",
+				"required": ["username", "password"],
+				"title": "Body_login_for_access_token"
+			},
+			"HTTPValidationError": {
+				"properties": {
+					"detail": {
+						"items": { "$ref": "#/components/schemas/ValidationError" },
+						"type": "array",
+						"title": "Detail"
+					}
+				},
+				"type": "object",
+				"title": "HTTPValidationError"
+			},
+			"SearchTodoStatus": {
+				"type": "string",
+				"enum": ["all", "done", "pending"],
+				"title": "SearchTodoStatus"
+			},
+			"Todo": {
+				"properties": {
+					"title": { "type": "string", "title": "Title" },
+					"description": { "type": "string", "title": "Description" },
+					"is_done": { "type": "boolean", "title": "Is Done" },
+					"id": { "type": "integer", "title": "Id" },
+					"user_id": { "type": "integer", "title": "User Id" }
+				},
+				"type": "object",
+				"required": ["title", "description", "is_done", "id", "user_id"],
+				"title": "Todo"
+			},
+			"TodoCreate": {
+				"properties": {
+					"title": { "type": "string", "title": "Title" },
+					"description": { "type": "string", "title": "Description" },
+					"is_done": { "type": "boolean", "title": "Is Done" }
+				},
+				"type": "object",
+				"required": ["title", "description", "is_done"],
+				"title": "TodoCreate"
+			},
+			"Token": {
+				"properties": {
+					"access_token": { "type": "string", "title": "Access Token" },
+					"token_type": { "type": "string", "title": "Token Type" }
+				},
+				"type": "object",
+				"required": ["access_token", "token_type"],
+				"title": "Token"
+			},
+			"User": {
+				"properties": {
+					"username": { "type": "string", "title": "Username" },
+					"id": { "type": "integer", "title": "Id" },
+					"todos": {
+						"items": { "$ref": "#/components/schemas/Todo" },
+						"type": "array",
+						"title": "Todos",
+						"default": []
+					}
+				},
+				"type": "object",
+				"required": ["username", "id", "todos"],
+				"title": "User"
+			},
+			"UserCreate": {
+				"properties": {
+					"username": { "type": "string", "title": "Username" },
+					"password": { "type": "string", "maxLength": 20, "minLength": 5, "title": "Password" },
+					"confirm_password": {
+						"type": "string",
+						"maxLength": 20,
+						"minLength": 5,
+						"title": "Confirm Password"
+					}
+				},
+				"type": "object",
+				"required": ["username", "password", "confirm_password"],
+				"title": "UserCreate"
+			},
+			"ValidationError": {
+				"properties": {
+					"loc": {
+						"items": { "anyOf": [{ "type": "string" }, { "type": "integer" }] },
+						"type": "array",
+						"title": "Location"
+					},
+					"msg": { "type": "string", "title": "Message" },
+					"type": { "type": "string", "title": "Error Type" }
+				},
+				"type": "object",
+				"required": ["loc", "msg", "type"],
+				"title": "ValidationError"
+			}
+		},
+		"securitySchemes": {
+			"OAuth2PasswordBearer": {
+				"type": "oauth2",
+				"flows": { "password": { "scopes": {}, "tokenUrl": "/oauth/token" } }
+			}
+		}
+	}
+}
