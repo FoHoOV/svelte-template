@@ -23,7 +23,7 @@ export const actions: Actions = {
 			});
 		}
 
-		const a= await callServiceInFormActions({
+		return await callServiceInFormActions({
 			serviceCall: async () => {
 				const token = await OAuthClient({
 					isTokenRequired: false
@@ -43,6 +43,5 @@ export const actions: Actions = {
 			},
 			errorSchema: Body_login_for_access_token
 		});
-		return a;
 	}
 } satisfies Actions;
