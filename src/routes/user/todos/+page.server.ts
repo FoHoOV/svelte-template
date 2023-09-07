@@ -31,7 +31,9 @@ export const actions: Actions = {
 				error: validationsResult.error.flatten().fieldErrors
 			});
 		}
-		const a= await callServiceInFormActions({
+
+		// if we return this without storing it in a value then the typings of ActionData will be wrong
+		const a = await callServiceInFormActions({
 			serviceCall: async () => {
 				return await TodoClient({ token: locals.token }).createForUser({
 					...validationsResult.data
