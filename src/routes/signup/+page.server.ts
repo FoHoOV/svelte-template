@@ -22,7 +22,7 @@ export const actions: Actions = {
 			});
 		}
 
-		return await callServiceInFormActions({
+		const a= await callServiceInFormActions({
 			serviceCall: async () => {
 				await UserClient({
 					isTokenRequired: false
@@ -31,5 +31,17 @@ export const actions: Actions = {
 			},
 			errorSchema: UserCreate
 		});
+		return a;
+
+		// if we return like this then in +page.svelte the type of ActionData is `{} | null`
+		// return await callServiceInFormActions({
+		// 	serviceCall: async () => {
+		// 		await UserClient({
+		// 			isTokenRequired: false
+		// 		}).signup(validationsResult.data);
+		// 		throw redirect(303, '/login');
+		// 	},
+		// 	errorSchema: UserCreate
+		// });
 	}
 } satisfies Actions;

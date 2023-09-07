@@ -174,6 +174,11 @@ export type ServiceCallOptions<
 	errorCallback?: (e: ServiceError<TErrorSchema>) => TErrorCallbackResult;
 };
 
+export type ErrorCallbackType<
+	TErrorSchema extends z.AnyZodObject,
+	TErrorCallbackResult extends Promise<unknown>
+> = Required<ServiceCallOptions<never, TErrorSchema, TErrorCallbackResult>>['errorCallback'];
+
 export async function callService<
 	TServiceCallResult extends Promise<unknown>,
 	TErrorSchema extends z.AnyZodObject,
@@ -186,9 +191,7 @@ export async function callService<
 			await handleUnauthenticatedUser();
 		}
 		return e;
-	}) as Required<
-		ServiceCallOptions<TServiceCallResult, TErrorSchema, TErrorCallbackResult>
-	>['errorCallback']
+	}) as ErrorCallbackType<TErrorSchema, TErrorCallbackResult>
 }: ServiceCallOptions<TServiceCallResult, TErrorSchema, TErrorCallbackResult>): Promise<
 	| {
 			success: false;

@@ -3,6 +3,7 @@ import {
 	callService,
 	ErrorType,
 	handleUnauthenticatedUser,
+	type ErrorCallbackType,
 	type ServiceCallOptions,
 	type ServiceError
 } from './wrapper.universal';
@@ -29,47 +30,17 @@ export async function superApplyAction<TErrorSchema extends z.AnyZodObject>(
 
 export async function callServiceInFormActions<
 	TServiceCallResult extends Promise<unknown>,
-	TErrorSchema extends z.AnyZodObject
->({
-	serviceCall,
-	errorSchema
-}: ServiceCallOptions<
-	TServiceCallResult,
-	TErrorSchema,
-	ReturnType<typeof superApplyAction<TErrorSchema>>
->): Promise<
-	| { success: true; result: Awaited<TServiceCallResult>; error: never }
-	| Awaited<ReturnType<typeof superApplyAction<TErrorSchema>>>
->;
-export async function callServiceInFormActions<
-	TServiceCallResult extends Promise<unknown>,
 	TErrorSchema extends z.AnyZodObject,
-	TErrorCallbackResult extends Promise<unknown>
+	TErrorCallbackResult extends Promise<unknown> = ReturnType<typeof superApplyAction<TErrorSchema>>
 >({
 	serviceCall,
-	errorSchema,
-	errorCallback
-}: RequiredProperty<
-	ServiceCallOptions<TServiceCallResult, TErrorSchema, TErrorCallbackResult>,
-	'errorCallback'
->): Promise<
-	{ success: true; result: Awaited<TServiceCallResult>; error: never } | TErrorCallbackResult
->;
-export async function callServiceInFormActions<
-	TServiceCallResult extends Promise<unknown>,
-	TErrorSchema extends z.AnyZodObject,
-	TErrorCallbackResult extends Promise<unknown>
->({
-	serviceCall,
-	errorSchema,
-	errorCallback = async (e) => {
+	errorCallback = (async (e) => {
 		return await superApplyAction(e);
-	}
-}: ServiceCallOptions<
-	TServiceCallResult,
-	TErrorSchema,
-	TErrorCallbackResult | ReturnType<typeof superApplyAction<TErrorSchema>>
->) {
+	}) as ErrorCallbackType<TErrorSchema, TErrorCallbackResult>,
+	errorSchema
+}: ServiceCallOptions<TServiceCallResult, TErrorSchema, TErrorCallbackResult>): Promise<
+	{ success: true; result: Awaited<TServiceCallResult> } | Awaited<TErrorCallbackResult>
+> {
 	const result = await callService({
 		serviceCall: serviceCall,
 		errorSchema: errorSchema,

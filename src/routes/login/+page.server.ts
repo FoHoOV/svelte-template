@@ -23,7 +23,7 @@ export const actions: Actions = {
 			});
 		}
 
-		return await callServiceInFormActions({
+		const a= await callServiceInFormActions({
 			serviceCall: async () => {
 				const token = await OAuthClient({
 					isTokenRequired: false
@@ -39,9 +39,10 @@ export const actions: Actions = {
 					});
 				}
 				// TODO: ts couldn't infer the e type here! and I have no idea why? >_<
-				return await superApplyAction<typeof Body_login_for_access_token>(e);
+				return await superApplyAction(e);
 			},
 			errorSchema: Body_login_for_access_token
 		});
+		return a;
 	}
 } satisfies Actions;

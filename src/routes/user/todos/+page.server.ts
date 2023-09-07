@@ -31,8 +31,7 @@ export const actions: Actions = {
 				error: validationsResult.error.flatten().fieldErrors
 			});
 		}
-
-		return await callServiceInFormActions({
+		const a= await callServiceInFormActions({
 			serviceCall: async () => {
 				return await TodoClient({ token: locals.token }).createForUser({
 					...validationsResult.data
@@ -40,5 +39,16 @@ export const actions: Actions = {
 			},
 			errorSchema: TodoCreate
 		});
+		return a;
+
+		// if we return like this then in +page.svelte the type of ActionData is `{} | null`
+		// return await callServiceInFormActions({
+		// 	serviceCall: async () => {
+		// 		return await TodoClient({ token: locals.token }).createForUser({
+		// 			...validationsResult.data
+		// 		});
+		// 	},
+		// 	errorSchema: TodoCreate
+		// });
 	}
 } satisfies Actions;
