@@ -32,7 +32,7 @@ export const actions: Actions = {
 			});
 		}
 
-		// if we return this without storing it in a value then the typings of ActionData will be wrong
+		// if we return this by storing it in a value then the typings of ActionData will be correct
 		const a = await callServiceInFormActions({
 			serviceCall: async () => {
 				return await TodoClient({ token: locals.token }).createForUser({
